@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  STUDENT
+}
+
+enum TourStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum Language {
+  KZ
+  RU
+  EN
+}
+
+enum TranslationStatus {
+  MANUAL
+  AUTO_GENERATED
+  AUTO_EDITED
+}
+
+enum ApplicationStatus {
+  NEW
+  CONTACTED
+  GOING
+  NOT_GOING
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  COMPLETED
+  CANCELLED
+}
+
+enum MomentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(MANAGER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  studentProfile     StudentProfile?
+  tourApplications   StudentTourApplication[] @relation("ApplicationStudent")
+  managedTourApplications StudentTourApplication[] @relation("ApplicationManager")
+  tourEnrollments    StudentTourEnrollment[]
+  travelMoments      StudentTravelMoment[]
+  passwordResetCodes PasswordResetCode[]
+  applicationStatusLogs ApplicationStatusLog[]
+}
+
+model TourPost {
+  id             String                @id @default(cuid())
+  slug           String                @unique
+  status         TourStatus            @default(DRAFT)
+  coverImage     String
+  gallery        String[]
+  price          Int
+  studentLimit   Int                   @default(40)
+  duration       String
+  meetingTime    String
+  tourDate       DateTime
+  place          String
+  location       String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  translations   TourPostTranslation[]
+  applications   StudentTourApplication[]
+  enrollments    StudentTourEnrollment[]
+  moments        StudentTravelMoment[]
+}
+
+model TourPostTranslation {
+  id                 String   @id @default(cuid())
+  tourPostId         String
+  language           Language
+  title              String
+  description        String
+  posterTemplateData Json
+  translationStatus  TranslationStatus @default(MANUAL)
+  translationVersion Int @default(1)
+  sourceRuHash       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tourPost TourPost @relation(fields: [tourPostId], references: [id], onDelete: Cascade)
+
+  @@unique([tourPostId, language])
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  brandTitle      String
+  brandSubtitle   String
+  instagramHandle String
+  footerAddress   String
+  topFrameText    String
+  bottomFrameText String
+  decorTokens     Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TeamMember {
+  id         String   @id @default(cuid())
+  fullNameRu String
+  fullNameKz String
+  fullNameEn String
+  positionRu String
+  positionKz String
+  positionEn String
+  photoUrl   String
+  sortOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model StudentProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  fullName    String
+  phone       String
+  university  String
+  avatarUrl   String?
+  bio         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudentTourApplication {
+  id          String            @id @default(cuid())
+  userId      String?
+  managerId   String?
+  tourPostId  String
+  fullName    String
+  phone       String
+  university  String
+  email       String
+  comment     String?
+  status      ApplicationStatus @default(NEW)
+  managerComment String?
+  contactedAt DateTime?
+  decisionAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user     User?    @relation("ApplicationStudent", fields: [userId], references: [id], onDelete: SetNull)
+  manager  User?    @relation("ApplicationManager", fields: [managerId], references: [id], onDelete: SetNull)
+  tourPost TourPost @relation(fields: [tourPostId], references: [id], onDelete: Cascade)
+  statusLogs ApplicationStatusLog[]
+
+  @@index([tourPostId, status])
+  @@index([userId, status])
+}
+
+model ApplicationStatusLog {
+  id            String            @id @default(cuid())
+  applicationId String
+  fromStatus    ApplicationStatus
+  toStatus      ApplicationStatus
+  changedById   String
+  note          String?
+  createdAt     DateTime          @default(now())
+
+  application StudentTourApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedBy   User @relation(fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@index([applicationId, createdAt])
+  @@index([changedById, createdAt])
+}
+
+model StudentTourEnrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  tourPostId  String
+  status      EnrollmentStatus @default(ENROLLED)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tourPost TourPost @relation(fields: [tourPostId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tourPostId])
+}
+
+model StudentTravelMoment {
+  id            String       @id @default(cuid())
+  userId        String
+  tourPostId    String
+  photoUrl      String
+  captionRu     String
+  captionKz     String
+  captionEn     String
+  status        MomentStatus @default(PENDING)
+  moderatorNote String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tourPost TourPost @relation(fields: [tourPostId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetCode {
+  id         String   @id @default(cuid())
+  userId     String
+  code       String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
