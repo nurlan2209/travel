@@ -1,16 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
 import { Calendar, Clock3, MapPin, Sparkles, Users } from "lucide-react";
 import { mapLangToPrismaEnum, normalizeLanguage } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { SiteHeader } from "@/components/public/site-header";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 type TourPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; preview?: string }>;
 };
 
 function formatDate(value: Date, lang: "kz" | "ru" | "en") {
@@ -27,6 +29,7 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
   const { slug } = await params;
   const query = await searchParams;
   const lang = normalizeLanguage(query.lang);
+  const previewRequested = query.preview === "1";
 
   const ui = {
     kz: {
@@ -72,8 +75,19 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
     }
   });
 
-  if (!tour || tour.status !== "PUBLISHED") {
+  if (!tour) {
     notFound();
+  }
+
+  if (tour.status !== "PUBLISHED") {
+    if (!previewRequested) {
+      notFound();
+    }
+    const session = await getServerSession(authOptions);
+    const role = session?.user?.role;
+    if (role !== "ADMIN" && role !== "MANAGER") {
+      notFound();
+    }
   }
 
   const translation = tour.translations[0];
@@ -102,6 +116,11 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
               MNU Travel
             </div>
             <h1 className="text-4xl font-black tracking-tight md:text-5xl">{translation?.title ?? tour.place}</h1>
+            {tour.status === "DRAFT" ? (
+              <p className="mt-3 inline-flex items-center rounded-full border border-amber-300/60 bg-amber-200/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-100">
+                Draft preview
+              </p>
+            ) : null}
             {translation?.description ? (
               <p className="mt-3 text-sm leading-relaxed text-white/88 md:text-base">{translation.description}</p>
             ) : null}

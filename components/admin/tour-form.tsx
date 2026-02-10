@@ -4,6 +4,7 @@
 import { useMemo, useRef, useState } from "react";
 import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { tourInputSchema } from "@/lib/validation";
@@ -197,6 +198,7 @@ const tourFormUi = {
     russianPoster: "Русский постер",
     kazakhPoster: "Қазақша постер",
     noPosters: "Постер әлі жоқ",
+    previewDraft: "Черновикті көру",
     saving: "Сақталуда...",
     saveTour: "Турды сақтау"
   },
@@ -246,6 +248,7 @@ const tourFormUi = {
     russianPoster: "Русский постер",
     kazakhPoster: "Казахский постер",
     noPosters: "Постеров пока нет",
+    previewDraft: "Предпросмотр черновика",
     saving: "Сохранение...",
     saveTour: "Сохранить тур"
   },
@@ -295,6 +298,7 @@ const tourFormUi = {
     russianPoster: "Russian poster",
     kazakhPoster: "Kazakh poster",
     noPosters: "No posters yet",
+    previewDraft: "Preview draft",
     saving: "Saving...",
     saveTour: "Save tour"
   }
@@ -581,6 +585,9 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
 
   const bannerUrl = form.watch("coverImage");
   const galleryImages = form.watch("gallery");
+  const slugValue = form.watch("slug");
+  const statusValue = form.watch("status");
+  const previewHref = initial?.id && slugValue && statusValue === "DRAFT" ? `/tours/${encodeURIComponent(slugValue)}?lang=${lang}&preview=1` : null;
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -763,13 +770,24 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
       </section>
 
       <div className="sticky bottom-4 z-20 flex justify-end rounded-2xl border border-white/25 bg-black/35 p-3 backdrop-blur-md">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-xl bg-[#8d1111] px-5 py-2 font-semibold text-white disabled:opacity-60"
-        >
-          {saving ? ui.saving : ui.saveTour}
-        </button>
+        <div className="flex flex-wrap justify-end gap-2">
+          {previewHref ? (
+            <Link
+              href={previewHref}
+              target="_blank"
+              className="rounded-xl border border-white/35 bg-white/15 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/25"
+            >
+              {ui.previewDraft}
+            </Link>
+          ) : null}
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-xl bg-[#8d1111] px-5 py-2 font-semibold text-white disabled:opacity-60"
+          >
+            {saving ? ui.saving : ui.saveTour}
+          </button>
+        </div>
       </div>
     </form>
   );

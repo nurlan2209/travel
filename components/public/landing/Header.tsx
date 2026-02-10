@@ -230,10 +230,10 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+                  className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-all ${
                     isPastTours
-                      ? "bg-[#0D3B8E] text-white hover:bg-[#0A2C6B]"
-                      : "bg-white/20 text-white hover:bg-white/30"
+                      ? "border-[#0A1022]/15 bg-white/70 text-[#0A1022] hover:bg-white"
+                      : "border-white/30 bg-white/20 text-white hover:bg-white/30"
                   }`}
                 >
                   {studentDisplayName}
@@ -278,10 +278,10 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
             ) : isAdminSide ? (
               <Link
                 href={quickHref}
-                className={`hidden rounded-xl px-4 py-2 text-sm font-semibold transition-all lg:inline-flex ${
+                className={`hidden rounded-xl border px-4 py-2 text-sm font-semibold transition-all lg:inline-flex ${
                   isPastTours
-                    ? "bg-[#0D3B8E] text-white hover:bg-[#0A2C6B]"
-                    : "bg-white/20 text-white hover:bg-white/30"
+                    ? "border-[#0A1022]/15 bg-white/70 text-[#0A1022] hover:bg-white"
+                    : "border-white/30 bg-white/20 text-white hover:bg-white/30"
                 }`}
               >
                 {quickLabel}
