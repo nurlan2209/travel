@@ -1,11 +1,10 @@
-import { notFound } from "next/navigation";
 import Image from "next/image";
-import { normalizeLanguage, t } from "@/lib/i18n";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Calendar, Clock3, MapPin, Sparkles, Users } from "lucide-react";
+import { mapLangToPrismaEnum, normalizeLanguage } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
-import { mapLangToPrismaEnum } from "@/lib/i18n";
-import { PosterPreview } from "@/components/public/poster-preview";
 import { SiteHeader } from "@/components/public/site-header";
-import { formatCurrencyKzt } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -14,11 +13,55 @@ type TourPageProps = {
   searchParams: Promise<{ lang?: string }>;
 };
 
+function formatDate(value: Date, lang: "kz" | "ru" | "en") {
+  const locale = lang === "kz" ? "kk-KZ" : lang === "en" ? "en-US" : "ru-RU";
+  return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(value);
+}
+
+function formatPrice(value: number, lang: "kz" | "ru" | "en") {
+  const locale = lang === "en" ? "en-US" : "ru-RU";
+  return `${new Intl.NumberFormat(locale).format(value)} ₸`;
+}
+
 export default async function TourPage({ params, searchParams }: TourPageProps) {
   const { slug } = await params;
   const query = await searchParams;
   const lang = normalizeLanguage(query.lang);
-  const dict = t(lang);
+
+  const ui = {
+    kz: {
+      place: "Орын",
+      location: "Локация",
+      date: "Күні",
+      meetup: "Жиналу",
+      duration: "Ұзақтығы",
+      spots: "Орын саны",
+      apply: "Өтінім қалдыру",
+      allTours: "Барлық турлар",
+      posters: "Тур постерлері",
+      gallery: "Галерея"
+    },
+    ru: {
+      place: "Место",
+      location: "Локация",
+      date: "Дата",
+      meetup: "Сбор",
+      duration: "Длительность",
+      spots: "Лимит мест",
+      apply: "Оставить заявку",
+      allTours: "Все туры"
+    },
+    en: {
+      place: "Place",
+      location: "Location",
+      date: "Date",
+      meetup: "Meetup",
+      duration: "Duration",
+      spots: "Seat limit",
+      apply: "Apply now",
+      allTours: "All tours"
+    }
+  }[lang];
 
   const tour = await prisma.tourPost.findUnique({
     where: { slug },
@@ -29,61 +72,82 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
     }
   });
 
-  if (!tour) {
+  if (!tour || tour.status !== "PUBLISHED") {
     notFound();
   }
 
   const translation = tour.translations[0];
-  const posterUrls =
-    (translation?.posterTemplateData as { posterUrls?: string[] } | undefined)?.posterUrls?.filter(Boolean) ??
-    [];
-  const effectivePosters = posterUrls;
-
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#1f3a5f_0%,#091525_50%,#050910_100%)] text-white">
+    <main className="theme-page-surface theme-tour-page min-h-screen bg-[linear-gradient(180deg,#ffffff_0%,#fff7da_100%)] text-[#0A1022]">
       <SiteHeader lang={lang} />
 
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-28 md:grid-cols-2">
-        <div className="space-y-4">
-          <h1 className="text-4xl font-black">{translation?.title ?? tour.place}</h1>
-          <p className="text-white/80">{translation?.description}</p>
-          <ul className="space-y-2 rounded-2xl border border-white/20 bg-white/10 p-4 text-sm">
-            <li>{dict.tourPlace}: {tour.place}</li>
-            <li>{dict.tourLocation}: {tour.location}</li>
-            <li>{dict.tourDate}: {new Date(tour.tourDate).toLocaleDateString()}</li>
-            <li>{dict.tourMeetup}: {tour.meetingTime}</li>
-            <li>{dict.tourDuration}: {tour.duration}</li>
-            <li className="text-lg font-black text-[#ffb3b3]">{formatCurrencyKzt(tour.price)}</li>
-          </ul>
-          <a href={`/?lang=${lang}#application`} className="inline-block rounded-full bg-[#8d1111] px-5 py-3 text-sm font-semibold">
-            {dict.tourApply}
-          </a>
+      <section className="relative overflow-hidden pt-20">
+        <div className="relative h-[52vh] min-h-[360px] w-full">
+          <Image
+            src={tour.coverImage}
+            alt={translation?.title ?? tour.place}
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,9,16,0.48)_0%,rgba(5,9,16,0.72)_100%)]" />
         </div>
 
-        <div className="space-y-4">
-          {effectivePosters.length > 0 ? (
-            effectivePosters.map((poster, idx) => (
-              <Image
-                key={`${poster}-${idx}`}
-                src={poster}
-                alt={`${translation?.title ?? tour.place} poster ${idx + 1}`}
-                width={1080}
-                height={1350}
-                className="w-full rounded-3xl object-cover"
-              />
-            ))
-          ) : (
-            <>
-              <Image
-                src={tour.coverImage}
-                alt={translation?.title ?? tour.place}
-                width={1200}
-                height={700}
-                className="h-72 w-full rounded-3xl object-cover"
-              />
-              <PosterPreview posterData={translation?.posterTemplateData ?? {}} lang={lang} />
-            </>
-          )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-b from-transparent to-[#fff7da]" />
+
+        <div className="absolute inset-x-0 top-24 z-20 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl rounded-3xl border border-white/25 bg-black/35 p-6 text-white shadow-[0_20px_70px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles size={14} />
+              MNU Travel
+            </div>
+            <h1 className="text-4xl font-black tracking-tight md:text-5xl">{translation?.title ?? tour.place}</h1>
+            {translation?.description ? (
+              <p className="mt-3 text-sm leading-relaxed text-white/88 md:text-base">{translation.description}</p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <Link
+                href={`/?lang=${lang}#application`}
+                className="rounded-xl border border-[#FFE066] bg-gradient-to-br from-[#FFD428] to-[#FFC000] px-5 py-2.5 text-sm font-bold text-[#0A1022] transition hover:from-[#FFC000] hover:to-[#FFB000]"
+              >
+                {ui.apply}
+              </Link>
+              <Link href={`/tours?lang=${lang}`} className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/15">
+                {ui.allTours}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto mt-8 max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="glass-white-strong rounded-3xl border border-white/90 p-6">
+          <h2 className="mb-4 text-2xl font-black">{ui.place}: {tour.place}</h2>
+          <div className="grid gap-3 text-sm text-[#0A1022]/80 sm:grid-cols-2">
+            <div className="flex items-center gap-2 rounded-xl border border-[#0A1022]/10 bg-white/70 px-3 py-2.5">
+              <MapPin size={16} className="text-[#0D3B8E]" />
+              <span>{ui.location}: {tour.location}</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-[#0A1022]/10 bg-white/70 px-3 py-2.5">
+              <Calendar size={16} className="text-[#0D3B8E]" />
+              <span>{ui.date}: {formatDate(tour.tourDate, lang)}</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-[#0A1022]/10 bg-white/70 px-3 py-2.5">
+              <Clock3 size={16} className="text-[#0D3B8E]" />
+              <span>{ui.duration}: {tour.duration}</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-[#0A1022]/10 bg-white/70 px-3 py-2.5">
+              <Users size={16} className="text-[#0D3B8E]" />
+              <span>{ui.spots}: {tour.studentLimit}</span>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-[#FFD428]/30 bg-gradient-to-r from-[#fff5bd] to-white p-4">
+            <p className="text-sm text-[#0A1022]/70">{ui.meetup}</p>
+            <p className="mt-1 text-lg font-bold text-[#0A1022]">{tour.meetingTime}</p>
+            <p className="mt-3 text-sm text-[#0A1022]/70">Цена</p>
+            <p className="text-3xl font-black text-[#C81F1F]">{formatPrice(tour.price, lang)}</p>
+          </div>
         </div>
       </section>
     </main>

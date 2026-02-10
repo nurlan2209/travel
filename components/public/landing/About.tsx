@@ -9,7 +9,7 @@ interface AboutProps {
 export default function About({ lang }: AboutProps) {
   const translations = {
     kz: {
-      title: 'Неге MNU Travel?',
+      title: 'Неге біз?',
       subtitle: 'Біз студенттерге ерекше тәжірибе ұсынамыз',
       card1Title: 'Чем мы отличаемся',
       card1Text: 'Біз студенттердің бюджетін, қызығушылықтарын және уақытын ескере отырып, арнайы турларды ұйымдастырамыз. Әр саяхат - жаңа достық және естеліктер.',
@@ -19,7 +19,7 @@ export default function About({ lang }: AboutProps) {
       card3Text: 'Барлық турлар тәжірибелі гидтермен өтеді. Біз сақтандыру, медициналық қолдау және 24/7 байланысты қамтамасыз етеміз.'
     },
     ru: {
-      title: 'Почему MNU Travel?',
+      title: 'Почему мы?',
       subtitle: 'Мы предлагаем студентам уникальный опыт',
       card1Title: 'Чем мы отличаемся',
       card1Text: 'Мы организуем специальные туры с учетом бюджета, интересов и времени студентов. Каждое путешествие - это новые дружбы и воспоминания.',
@@ -29,7 +29,7 @@ export default function About({ lang }: AboutProps) {
       card3Text: 'Все туры проходят с опытными гидами. Мы обеспечиваем страховку, медицинскую поддержку и связь 24/7.'
     },
     en: {
-      title: 'Why MNU Travel?',
+      title: 'Why us?',
       subtitle: 'We offer students a unique experience',
       card1Title: 'What Makes Us Different',
       card1Text: 'We organize special tours considering students\' budget, interests and time. Every journey brings new friendships and memories.',

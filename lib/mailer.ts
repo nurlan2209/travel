@@ -26,9 +26,9 @@ export async function sendResetCodeEmail(email: string, code: string) {
   await transporter.sendMail({
     from,
     to: email,
-    subject: "MNU Travel: Код для сброса пароля",
+    subject: "Тур-платформа: Код для сброса пароля",
     text: `Ваш код для сброса пароля: ${code}. Код действует 15 минут.`,
-    html: `<div style=\"font-family:Arial,sans-serif;line-height:1.5\"><h2>MNU Travel</h2><p>Ваш код для сброса пароля:</p><p style=\"font-size:28px;font-weight:700;letter-spacing:6px\">${code}</p><p>Код действует 15 минут.</p></div>`
+    html: `<div style=\"font-family:Arial,sans-serif;line-height:1.5\"><h2>Tour Platform</h2><p>Ваш код для сброса пароля:</p><p style=\"font-size:28px;font-weight:700;letter-spacing:6px\">${code}</p><p>Код действует 15 минут.</p></div>`
   });
 }
 
@@ -53,7 +53,7 @@ export async function sendApplicationStatusEmail(payload: ApplicationStatusMailP
   }[payload.status];
 
   const tourDate = payload.tourDate.toLocaleDateString("ru-RU");
-  const subject = `MNU Travel: статус вашей заявки — ${statusText}`;
+  const subject = `Тур-платформа: статус вашей заявки — ${statusText}`;
 
   const transporter = getTransport();
   await transporter.sendMail({
@@ -66,10 +66,10 @@ export async function sendApplicationStatusEmail(payload: ApplicationStatusMailP
       `Тур: ${payload.tourTitle}\n` +
       `Дата: ${tourDate}\n` +
       (payload.note ? `Комментарий менеджера: ${payload.note}\n` : "") +
-      `\nMNU Travel`,
+      `\nTour Platform`,
     html:
       `<div style=\"font-family:Arial,sans-serif;line-height:1.5\">` +
-      `<h2>MNU Travel</h2>` +
+      `<h2>Tour Platform</h2>` +
       `<p>Здравствуйте, <b>${payload.fullName}</b>.</p>` +
       `<p>Статус вашей заявки обновлен: <b>${statusText}</b>.</p>` +
       `<p><b>Тур:</b> ${payload.tourTitle}<br/><b>Дата:</b> ${tourDate}</p>` +

@@ -10,21 +10,21 @@ interface HeroProps {
 export default function Hero({ lang }: HeroProps) {
   const translations = {
     kz: {
-      badge: 'Қазақстан студенттік турлары',
+      badge: 'Kazakhstan MNU Travel',
       title: 'MNU Travel',
       subtitle: 'Саяхаттаңыз. Білім алыңыз. Танысыңыз.',
       cta1: 'Турларды қарау',
       cta2: 'Өтінім қалдыру'
     },
     ru: {
-      badge: 'Kazakhstan Student Tours',
+      badge: 'Kazakhstan MNU Travel',
       title: 'MNU Travel',
       subtitle: 'Путешествуй. Узнавай. Знакомься.',
       cta1: 'Смотреть туры',
       cta2: 'Оставить заявку'
     },
     en: {
-      badge: 'Kazakhstan Student Tours',
+      badge: 'Kazakhstan MNU Travel',
       title: 'MNU Travel',
       subtitle: 'Travel. Discover. Connect.',
       cta1: 'View Tours',

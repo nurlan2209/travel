@@ -1,42 +1,55 @@
 "use client";
 
-import { MapPin, Phone, Mail, Instagram } from 'lucide-react';
+import Image from "next/image";
+import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 interface FooterProps {
-  lang: 'kz' | 'ru' | 'en';
+  lang: "kz" | "ru" | "en";
 }
 
 export default function Footer({ lang }: FooterProps) {
   const translations = {
     kz: {
-      tagline: 'Саяхаттаңыз. Білім алыңыз. Танысыңыз.',
-      navigation: 'Навигация',
-      nav: ['Басты', 'Турлар', 'Студенттер турлары', 'Құжаттар', 'Біз туралы', 'Байланыс'],
-      navIds: ['home', 'tours', 'student-tours', 'documents', 'about', 'contact'],
-      contacts: 'Байланыс',
-      city: 'Алматы, Қазақстан',
-      rights: '© 2026 MNU Travel. Барлық құқықтар қорғалған.',
-      followUs: 'Бізді Instagram-да бақылаңыз'
+      tagline: "Саяхаттаңыз. Білім алыңыз. Танысыңыз.",
+      navigation: "Навигация",
+      links: [
+        { label: "Басты", id: "home" },
+        { label: "Турлар", id: "tours" },
+        { label: "Құжаттар", id: "documents" },
+        { label: "Біз туралы", id: "about" },
+        { label: "Байланыс", id: "contact" }
+      ],
+      contacts: "Байланыс",
+      city: "Алматы, Қазақстан",
+      rights: "© 2026. Барлық құқықтар қорғалған."
     },
     ru: {
-      tagline: 'Путешествуй. Узнавай. Знакомься.',
-      navigation: 'Навигация',
-      nav: ['Главная', 'Туры', 'Туры студентов', 'Документы', 'О нас', 'Контакты'],
-      navIds: ['home', 'tours', 'student-tours', 'documents', 'about', 'contact'],
-      contacts: 'Контакты',
-      city: 'Алматы, Казахстан',
-      rights: '© 2026 MNU Travel. Все права защищены.',
-      followUs: 'Следите за нами в Instagram'
+      tagline: "Путешествуй. Узнавай. Знакомься.",
+      navigation: "Навигация",
+      links: [
+        { label: "Главная", id: "home" },
+        { label: "Туры", id: "tours" },
+        { label: "Документы", id: "documents" },
+        { label: "О нас", id: "about" },
+        { label: "Контакты", id: "contact" }
+      ],
+      contacts: "Контакты",
+      city: "Алматы, Казахстан",
+      rights: "© 2026. Все права защищены."
     },
     en: {
-      tagline: 'Travel. Discover. Connect.',
-      navigation: 'Navigation',
-      nav: ['Home', 'Tours', 'Student Tours', 'Documents', 'About', 'Contacts'],
-      navIds: ['home', 'tours', 'student-tours', 'documents', 'about', 'contact'],
-      contacts: 'Contacts',
-      city: 'Almaty, Kazakhstan',
-      rights: '© 2026 MNU Travel. All rights reserved.',
-      followUs: 'Follow us on Instagram'
+      tagline: "Travel. Discover. Connect.",
+      navigation: "Navigation",
+      links: [
+        { label: "Home", id: "home" },
+        { label: "Tours", id: "tours" },
+        { label: "Documents", id: "documents" },
+        { label: "About", id: "about" },
+        { label: "Contacts", id: "contact" }
+      ],
+      contacts: "Contacts",
+      city: "Almaty, Kazakhstan",
+      rights: "© 2026. All rights reserved."
     }
   };
 
@@ -57,66 +70,71 @@ export default function Footer({ lang }: FooterProps) {
   };
 
   return (
-    <footer id="contact" className="bg-gradient-to-b from-[#0A1022] to-[#050810] text-white py-16">
+    <footer id="contact" className="bg-gradient-to-b from-[#0A1022] to-[#050810] py-16 text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-4xl text-center">
-          <div className="mb-4 flex items-center justify-center space-x-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFD428] to-[#FFC000] shadow-lg">
-              <span className="text-2xl font-bold text-[#0A1022]">M</span>
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <div className="relative h-16 w-44">
+              <Image src="/лого_mnutravel.svg" alt="MNU Travel" fill className="object-contain object-left" />
             </div>
-            <span className="text-2xl font-bold">MNU Travel</span>
+            <p className="mt-4 text-sm text-white/75">{t.tagline}</p>
+            <a
+              href="https://instagram.com/mnutravel"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#FFD428] transition hover:text-[#FFC000]"
+            >
+              <Instagram size={18} />
+              @mnutravel
+            </a>
           </div>
 
-          <p className="mb-6 text-white/70">{t.tagline}</p>
-
-          <a
-            href="https://instagram.com/mnutravel"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#FFD428] to-[#FFC000] px-4 py-2 font-semibold text-[#0A1022] transition-all duration-300 hover:from-[#FFC000] hover:to-[#FFB000]"
-          >
-            <Instagram size={20} />
-            @mnutravel
-          </a>
-
-          <div className="mt-9">
+          <div>
             <h4 className="mb-4 text-lg font-bold">{t.navigation}</h4>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              {t.nav.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleNavClick(t.navIds[index])}
-                  className="text-white/70 transition-colors hover:text-[#FFD428]"
-                >
-                  {item}
-                </button>
+            <ul className="space-y-3">
+              {t.links.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleNavClick(item.id)}
+                    className="text-sm text-white/70 transition-colors hover:text-[#FFD428]"
+                  >
+                    {item.label}
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          <div className="mt-9">
+          <div>
             <h4 className="mb-4 text-lg font-bold">{t.contacts}</h4>
-            <div className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center">
-              <div className="flex items-center gap-2 text-white/75">
+            <div className="space-y-4 text-sm text-white/75">
+              <div className="flex items-center gap-2">
                 <MapPin size={18} className="text-[#FFD428]" />
                 <span>{t.city}</span>
               </div>
-              <div className="flex items-center gap-2 text-white/75">
-                <Phone size={18} className="text-[#FFD428]" />
-                <div className="space-y-1 text-center">
-                  <a href="tel:+77001234567" className="block transition-colors hover:text-[#FFD428]">+7 (700) 123-45-67</a>
-                  <a href="tel:+77001234568" className="block transition-colors hover:text-[#FFD428]">+7 (700) 123-45-68</a>
+              <div className="flex items-start gap-2">
+                <Phone size={18} className="mt-0.5 text-[#FFD428]" />
+                <div className="space-y-1">
+                  <a href="tel:+77001234567" className="block transition-colors hover:text-[#FFD428]">
+                    +7 (700) 123-45-67
+                  </a>
+                  <a href="tel:+77001234568" className="block transition-colors hover:text-[#FFD428]">
+                    +7 (700) 123-45-68
+                  </a>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-white/75">
+              <div className="flex items-center gap-2">
                 <Mail size={18} className="text-[#FFD428]" />
-                <a href="mailto:info@mnutravel.kz" className="transition-colors hover:text-[#FFD428]">info@mnutravel.kz</a>
+                <a href="mailto:info@mnutravel.kz" className="transition-colors hover:text-[#FFD428]">
+                  info@mnutravel.kz
+                </a>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 text-center text-white/60 text-sm">
+        <div className="mt-10 border-t border-white/10 pt-8 text-center text-sm text-white/60">
           <p>{t.rights}</p>
         </div>
       </div>

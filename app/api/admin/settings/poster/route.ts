@@ -12,12 +12,12 @@ export async function GET() {
       (await prisma.siteSettings.create({
         data: {
           id: "default",
-          brandTitle: "Этно-тур с MNU Travel",
+          brandTitle: "Этно-тур",
           brandSubtitle: "Откройте для себя свободу и тайны кочевой жизни",
           instagramHandle: "@mnutravel",
           footerAddress: "Зона отдыха Balqaragai, Астана",
-          topFrameText: "Этно-тур с MNU Travel",
-          bottomFrameText: "Почувствуй атмосферу этно-тура с MNU Travel",
+          topFrameText: "Этно-тур",
+          bottomFrameText: "Почувствуй атмосферу этно-тура",
           decorTokens: {}
         }
       }));

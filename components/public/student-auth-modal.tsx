@@ -279,7 +279,7 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
         onClick={() => openModal("default")}
         className={`hidden lg:inline-flex rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
           darkText
-            ? "bg-[#0D3B8E] text-white hover:bg-[#0A2C6B]"
+            ? "border border-[#FFE066] bg-gradient-to-br from-[#FFD428] to-[#FFC000] text-[#0A1022] hover:from-[#FFC000] hover:to-[#FFB000]"
             : "bg-white/20 text-white hover:bg-white/30"
         }`}
       >
@@ -298,7 +298,7 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
           <div
             onClick={(event) => event.stopPropagation()}
             className={`w-full max-w-md origin-top overflow-hidden rounded-[30px] border border-white/25 bg-[#1a1a1d]/60 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)] transition-[height,transform,opacity] duration-280 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              tab === "register" ? "h-[460px]" : "h-[360px]"
+              tab === "register" ? "h-[480px]" : "h-[360px]"
             } ${
               visible
                 ? "translate-y-0 scale-100 opacity-100"

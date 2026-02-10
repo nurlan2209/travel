@@ -84,15 +84,33 @@ export default function Gallery({ lang }: GalleryProps) {
           <p className="text-lg text-[#0A1022]/70">{t.subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:hidden">
+          {galleryImages.map((image, index) => (
+            <article key={`mobile-moment-${index}`} className="glass-card relative min-h-[300px] min-w-[86%] snap-center overflow-hidden rounded-2xl">
+              <ImageWithFallback
+                src={image.src}
+                alt={image.alt}
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
+              {"caption" in image ? (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/45 px-3 py-2 text-xs text-white">
+                  {(image as { caption?: string }).caption}
+                </div>
+              ) : null}
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden max-w-7xl mx-auto gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2 lg:row-span-2">
-            <div className="relative h-full min-h-[400px] rounded-2xl overflow-hidden group glass-card">
+            <div className="group glass-card relative h-full min-h-[400px] overflow-hidden rounded-2xl">
               <ImageWithFallback
                 src={galleryImages[0].src}
                 alt={galleryImages[0].alt}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               {"caption" in galleryImages[0] ? (
                 <div className="absolute bottom-0 left-0 right-0 bg-black/45 px-3 py-2 text-xs text-white">
                   {(galleryImages[0] as { caption?: string }).caption}
@@ -103,13 +121,13 @@ export default function Gallery({ lang }: GalleryProps) {
 
           {galleryImages.slice(1).map((image, index) => (
             <div key={index}>
-              <div className="relative h-full min-h-[190px] rounded-2xl overflow-hidden group glass-card">
+              <div className="group glass-card relative h-full min-h-[190px] overflow-hidden rounded-2xl">
                 <ImageWithFallback
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 {"caption" in image ? (
                   <div className="absolute bottom-0 left-0 right-0 bg-black/45 px-3 py-2 text-xs text-white">
                     {(image as { caption?: string }).caption}

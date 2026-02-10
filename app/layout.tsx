@@ -4,8 +4,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "MNU Travel",
-  description: "Travel MNU Kazakhstan clone with CMS"
+  title: "MNU Travel Kazakhstan",
+  description: "Student travel platform across Kazakhstan"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

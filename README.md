@@ -84,6 +84,7 @@ Open:
 
 - `POST /api/auth/[...nextauth]`
 - `GET /api/tours?lang=kz|ru|en&status=published`
+- `GET /api/tours/catalog?lang=...&q=...&location=...&dateFrom=...&dateTo=...&sort=...&page=...&pageSize=...`
 - `GET /api/tours/:slug?lang=...`
 - `GET|POST /api/admin/tours`
 - `GET|PATCH|DELETE /api/admin/tours/:id`

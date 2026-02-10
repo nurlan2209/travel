@@ -7,6 +7,7 @@ import { LogOut, Menu, Pencil, UserRound, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import type { CSSProperties } from "react";
 import { StudentAuthModal } from "@/components/public/student-auth-modal";
+import { ThemeToggle } from "@/components/public/theme-toggle";
 
 interface HeaderProps {
   currentLang: "kz" | "ru" | "en";
@@ -109,8 +110,9 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
 
   const translations = {
     kz: {
-      nav: ["Басты", "Турлар", "Студенттер турлары", "Құжаттар", "Біз туралы", "Байланыс"],
-      navIds: ["home", "tours", "student-tours", "documents", "about", "contact"],
+      nav: ["Басты", "Турлар", "Құжаттар", "Біз туралы", "Байланыс"],
+      navIds: ["home", "tours", "documents", "about", "contact"],
+      language: "Тіл",
       login: "Кіру",
       profile: "Профиль",
       myTours: "Менің турларым",
@@ -119,8 +121,9 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
       studentDefault: "Студент"
     },
     ru: {
-      nav: ["Главная", "Туры", "Туры студентов", "Документы", "О нас", "Контакты"],
-      navIds: ["home", "tours", "student-tours", "documents", "about", "contact"],
+      nav: ["Главная", "Туры", "Документы", "О нас", "Контакты"],
+      navIds: ["home", "tours", "documents", "about", "contact"],
+      language: "Язык",
       login: "Войти",
       profile: "Профиль",
       myTours: "Мои туры",
@@ -129,8 +132,9 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
       studentDefault: "Студент"
     },
     en: {
-      nav: ["Home", "Tours", "Student Tours", "Documents", "About", "Contacts"],
-      navIds: ["home", "tours", "student-tours", "documents", "about", "contact"],
+      nav: ["Home", "Tours", "Documents", "About", "Contacts"],
+      navIds: ["home", "tours", "documents", "about", "contact"],
+      language: "Language",
       login: "Sign in",
       profile: "Profile",
       myTours: "My tours",
@@ -184,42 +188,43 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
         </defs>
       </svg>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          <button onClick={() => handleNavClick("home")} className="flex items-center space-x-3 group cursor-pointer">
-            <div className="relative h-24 w-24">
-              <Image
-                src="/logo_mnu.svg"
-                alt="MNU logo"
-                fill
-                className={`object-contain transition-[filter] duration-300 ${isPastTours ? "brightness-0" : "brightness-100"}`}
-              />
-            </div>
-            <span className={`text-xl font-bold transition-colors ${isPastTours ? "text-[#0A1022] group-hover:text-[#0D3B8E]" : "text-white group-hover:text-[#FFD428]"}`}>
-              MNU Travel
-            </span>
-          </button>
+      <div className="container mx-auto px-2 sm:px-4 lg:px-6">
+        <div className="flex h-20 items-center">
+          <div className="flex items-center lg:w-[240px]">
+            <button onClick={() => handleNavClick("home")} className="group flex cursor-pointer items-center space-x-3 lg:ml-4">
+              <div className="relative h-17 w-20">
+                <Image
+                  src="/лого_mnutravel.svg"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </button>
+          </div>
 
-          <nav className={`hidden lg:block liquid-nav-group ${isPastTours ? "liquid-nav-group--dark" : "liquid-nav-group--light"}`}>
-            <span className="liquid-nav-group__backdrop" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--top" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--bottom" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--left" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--right" />
-            <div className="liquid-nav-group__row">
-              {translations[currentLang].nav.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleNavClick(translations[currentLang].navIds[index])}
-                  className={`liquid-nav-group__item px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${isPastTours ? "text-[#0A1022] hover:text-[#0D3B8E]" : "text-white hover:text-[#FFD428]"}`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </nav>
+          <div className="hidden flex-1 justify-center lg:flex">
+            <nav className={`liquid-nav-group ${isPastTours ? "liquid-nav-group--dark" : "liquid-nav-group--light"}`}>
+              <span className="liquid-nav-group__backdrop" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--top" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--bottom" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--left" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--right" />
+              <div className="liquid-nav-group__row">
+                {translations[currentLang].nav.map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleNavClick(translations[currentLang].navIds[index])}
+                    className={`liquid-nav-group__item px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${isPastTours ? "text-[#0A1022] hover:text-[#0D3B8E]" : "text-white hover:text-[#FFD428]"}`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </nav>
+          </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="ml-auto flex items-center space-x-3 lg:w-[240px] lg:justify-end">
             {isStudent ? (
               <div className="relative hidden lg:block" ref={profileMenuRef}>
                 <button
@@ -285,14 +290,22 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
               <StudentAuthModal darkText={isPastTours} lang={currentLang} />
             )}
 
-            <div className={`mr-2 hidden lg:flex lang-switcher ${isPastTours ? "lang-switcher--dark" : "lang-switcher--light"}`} style={{ "--active-index": String(activeIndex) } as CSSProperties} role="tablist" aria-label="Choose language">
-              <span ref={thumbRef} className="lang-switcher__thumb" aria-hidden="true" />
-              {langOrder.map((lang) => (
-                <button key={lang} type="button" className="lang-switcher__option" onClick={() => onLangChange(lang)} role="tab" aria-selected={currentLang === lang} aria-label={lang.toUpperCase()}>
-                  <span className={`lang-switcher__text ${currentLang === lang ? "lang-switcher__text--active" : ""}`}>{lang.toUpperCase()}</span>
-                </button>
-              ))}
+            <div className="hidden lg:flex">
+              <ThemeToggle darkText={isPastTours} />
             </div>
+
+            <div className="mr-2 hidden lg:flex">
+              <div className={`lang-switcher ${isPastTours ? "lang-switcher--dark" : "lang-switcher--light"}`} style={{ "--active-index": String(activeIndex) } as CSSProperties} role="tablist" aria-label="Choose language">
+                <span ref={thumbRef} className="lang-switcher__thumb" aria-hidden="true" />
+                {langOrder.map((lang) => (
+                  <button key={lang} type="button" className="lang-switcher__option" onClick={() => onLangChange(lang)} role="tab" aria-selected={currentLang === lang} aria-label={lang.toUpperCase()}>
+                    <span className={`lang-switcher__text ${currentLang === lang ? "lang-switcher__text--active" : ""}`}>{lang.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <ThemeToggle className="h-9 w-9 lg:hidden" darkText={isPastTours} />
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -371,7 +384,9 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
                 </button>
               )}
               <div className={`mt-1 rounded-xl px-2 py-2 ${isPastTours ? "bg-white/30" : "bg-white/10"}`}>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">Language</div>
+                <div className={`mb-1 text-[10px] font-semibold uppercase tracking-wider ${isPastTours ? "text-[#0A1022]/70" : "text-white/70"}`}>
+                  {translations[currentLang].language}
+                </div>
                 <div className="inline-flex rounded-lg bg-black/25 p-1">
                   {langOrder.map((lang) => (
                     <button

@@ -155,7 +155,7 @@ const tourFormUi = {
     setupTitle: "Турды баптау",
     setupHint: "Негізгі ақпарат -> аударма -> әр тілге постерлер.",
     sectionBasics: "Негізгі",
-    sectionMedia: "Медиа және баға",
+    sectionMedia: "Баннер, галерея және баға",
     studentLimit: "Студенттер лимиті",
     sectionSchedule: "Кездесу және орын",
     sectionTranslations: "Мәтін аудармалары",
@@ -164,8 +164,8 @@ const tourFormUi = {
     status: "Күйі",
     statusDraft: "Черновик",
     statusPublished: "Жарияланған",
-    coverImage: "Мұқаба сурет URL",
-    gallery: "Галерея (үтірмен бөлінген URL)",
+    coverImage: "Тур баннері",
+    gallery: "Тур фотолары",
     price: "Бағасы",
     duration: "Ұзақтығы",
     meetingTime: "Жиналу уақыты",
@@ -183,6 +183,13 @@ const tourFormUi = {
     postersWarning: "Жариялау үшін барлық 3 тілге кемі 1 постер жүктеген дұрыс.",
     publishWithoutPosters: "Кей тілдерде постерлер жоқ. Ескертуімен жариялау керек пе?",
     posterUploadFailed: "Постер жүктеу сәтсіз аяқталды.",
+    mediaUploadFailed: "Суретті жүктеу сәтсіз аяқталды.",
+    addGallery: "Фото қосу",
+    bannerHint: "Негізгі беттегі шапка мен карточкада көрінеді.",
+    galleryHint: "Тур бетіндегі галерея үшін бірнеше фото жүктеңіз.",
+    removeImage: "Суретті өшіру",
+    noBanner: "Баннер жүктелмеген",
+    noGallery: "Галереяда фото жоқ",
     addPoster: "Постер қосу",
     upload: "Жүктеу",
     remove: "Өшіру",
@@ -197,7 +204,7 @@ const tourFormUi = {
     setupTitle: "Настройка тура",
     setupHint: "База -> перевод -> постеры для каждого языка.",
     sectionBasics: "Основное",
-    sectionMedia: "Медиа и цена",
+    sectionMedia: "Баннер, галерея и цена",
     studentLimit: "Лимит студентов",
     sectionSchedule: "Встреча и место",
     sectionTranslations: "Текст и перевод",
@@ -206,8 +213,8 @@ const tourFormUi = {
     status: "Статус",
     statusDraft: "Черновик",
     statusPublished: "Опубликовано",
-    coverImage: "URL обложки",
-    gallery: "Галерея (URL через запятую)",
+    coverImage: "Баннер тура",
+    gallery: "Фотографии тура",
     price: "Цена",
     duration: "Длительность",
     meetingTime: "Время сбора",
@@ -225,6 +232,13 @@ const tourFormUi = {
     postersWarning: "Для публикации лучше загрузить хотя бы 1 постер для всех 3 языков.",
     publishWithoutPosters: "В некоторых языках нет постеров. Публиковать с предупреждением?",
     posterUploadFailed: "Не удалось загрузить постер.",
+    mediaUploadFailed: "Не удалось загрузить изображение.",
+    addGallery: "Добавить фото",
+    bannerHint: "Используется как шапка и обложка карточки тура.",
+    galleryHint: "Загрузите несколько фото для галереи страницы тура.",
+    removeImage: "Удалить фото",
+    noBanner: "Баннер не загружен",
+    noGallery: "Фотографий пока нет",
     addPoster: "Добавить еще",
     upload: "Загрузить",
     remove: "Удалить",
@@ -239,7 +253,7 @@ const tourFormUi = {
     setupTitle: "Tour setup",
     setupHint: "Basics -> translation -> posters per language.",
     sectionBasics: "Basics",
-    sectionMedia: "Media and price",
+    sectionMedia: "Banner, gallery and price",
     studentLimit: "Student limit",
     sectionSchedule: "Meeting and place",
     sectionTranslations: "Text and translation",
@@ -248,8 +262,8 @@ const tourFormUi = {
     status: "Status",
     statusDraft: "Draft",
     statusPublished: "Published",
-    coverImage: "Cover image URL",
-    gallery: "Gallery (comma-separated URLs)",
+    coverImage: "Tour banner",
+    gallery: "Tour photos",
     price: "Price",
     duration: "Duration",
     meetingTime: "Meeting time",
@@ -267,6 +281,13 @@ const tourFormUi = {
     postersWarning: "For publishing, upload at least one poster for all 3 languages.",
     publishWithoutPosters: "Some languages have no posters. Publish anyway?",
     posterUploadFailed: "Poster upload failed.",
+    mediaUploadFailed: "Image upload failed.",
+    addGallery: "Add photos",
+    bannerHint: "Used as hero and tour card cover.",
+    galleryHint: "Upload multiple images for the tour gallery.",
+    removeImage: "Remove image",
+    noBanner: "Banner is not uploaded yet",
+    noGallery: "No gallery photos yet",
     addPoster: "Add more",
     upload: "Upload",
     remove: "Remove",
@@ -290,6 +311,8 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
     kz: useRef<HTMLInputElement | null>(null),
     en: useRef<HTMLInputElement | null>(null)
   };
+  const bannerUploadRef = useRef<HTMLInputElement | null>(null);
+  const galleryUploadRef = useRef<HTMLInputElement | null>(null);
 
   const mappedInitial = useMemo(() => {
     const kzRaw = initial?.translations.find((item) => item.language === "KZ");
@@ -327,23 +350,20 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
     defaultValues: mappedInitial
   });
 
-  function setPosterUrl(language: "ru" | "kz" | "en", index: number, value: string) {
-    setPosterUrlsByLang((prev) => {
-      const next = { ...prev, [language]: [...prev[language]] };
-      next[language][index] = value;
-      return next;
-    });
-  }
-
-  function addPoster(language: "ru" | "kz" | "en") {
-    setPosterUrlsByLang((prev) => ({ ...prev, [language]: [...prev[language], ""] }));
-  }
-
   function removePoster(language: "ru" | "kz" | "en", index: number) {
     setPosterUrlsByLang((prev) => ({
       ...prev,
       [language]: prev[language].filter((_, idx) => idx !== index)
     }));
+  }
+
+  function removeGalleryImage(index: number) {
+    const current = form.getValues("gallery");
+    form.setValue(
+      "gallery",
+      current.filter((_, idx) => idx !== index),
+      { shouldDirty: true, shouldValidate: true }
+    );
   }
 
   async function onUploadPoster(language: "ru" | "kz" | "en", index?: number, file?: File | null) {
@@ -362,6 +382,36 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
       });
     } catch {
       setError(ui.posterUploadFailed);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onUploadBanner(file?: File | null) {
+    if (!file) return;
+    try {
+      setSaving(true);
+      const url = await uploadFileToCloudinary(file);
+      form.setValue("coverImage", url, { shouldDirty: true, shouldValidate: true });
+    } catch {
+      setError(ui.mediaUploadFailed);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onUploadGallery(files?: FileList | null) {
+    if (!files || files.length === 0) return;
+    try {
+      setSaving(true);
+      const uploadedUrls = await Promise.all(Array.from(files).map((file) => uploadFileToCloudinary(file)));
+      const current = form.getValues("gallery");
+      form.setValue("gallery", [...current, ...uploadedUrls], {
+        shouldDirty: true,
+        shouldValidate: true
+      });
+    } catch {
+      setError(ui.mediaUploadFailed);
     } finally {
       setSaving(false);
     }
@@ -496,32 +546,17 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
         {urls.length === 0 ? <p className="text-xs text-white/60">{ui.noPosters}</p> : null}
         {urls.map((url, index) => (
           <div key={`${language}-${index}`} className="space-y-2 rounded-lg border border-white/15 bg-white/5 p-2">
-            <div className="flex gap-2">
-              <input
-                value={url}
-                onChange={(event) => setPosterUrl(language, index, event.target.value)}
-                placeholder="https://..."
-                className="w-full rounded-lg border border-white/30 bg-black/20 px-3 py-2 text-sm text-white outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => removePoster(language, index)}
-                className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white"
-              >
-                {ui.remove}
-              </button>
-            </div>
             {url ? <img src={url} alt={`${language}-poster-${index + 1}`} className="w-full rounded-lg object-cover" /> : null}
+            <button
+              type="button"
+              onClick={() => removePoster(language, index)}
+              className="w-full rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white"
+            >
+              {ui.remove}
+            </button>
           </div>
         ))}
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => addPoster(language)}
-            className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white"
-          >
-            {ui.addPoster}
-          </button>
           <button
             type="button"
             onClick={() => uploadRefs[language].current?.click()}
@@ -543,6 +578,9 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
       </div>
     );
   }
+
+  const bannerUrl = form.watch("coverImage");
+  const galleryImages = form.watch("gallery");
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -578,18 +616,96 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
       <section className="space-y-3 rounded-2xl border border-white/20 bg-white/8 p-4">
         <h3 className="text-sm font-bold uppercase tracking-wider text-white/90">{ui.sectionMedia}</h3>
         <div className="grid gap-3 md:grid-cols-2">
-          <Input label={ui.coverImage} {...form.register("coverImage")} />
-          <Input
-            label={ui.gallery}
-            defaultValue={mappedInitial.gallery.join(", ")}
-            onChange={(event) => {
-              const value = event.target.value
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean);
-              form.setValue("gallery", value);
-            }}
-          />
+          <input type="hidden" {...form.register("coverImage")} />
+          <div className="space-y-2 md:col-span-2">
+            <span className="block text-xs text-white/80">{ui.coverImage}</span>
+            <div className="rounded-xl border border-white/30 bg-black/20 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-xs text-white/65">{ui.bannerHint}</p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => bannerUploadRef.current?.click()}
+                    className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white"
+                  >
+                    {ui.upload}
+                  </button>
+                  {bannerUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => form.setValue("coverImage", "", { shouldDirty: true, shouldValidate: true })}
+                      className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white"
+                    >
+                      {ui.remove}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+              {bannerUrl ? (
+                <img src={bannerUrl} alt="tour-banner" className="h-52 w-full rounded-lg object-cover" />
+              ) : (
+                <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-white/25 bg-black/20 text-sm text-white/50">
+                  {ui.noBanner}
+                </div>
+              )}
+              <input
+                ref={bannerUploadRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(event) => {
+                  void onUploadBanner(event.target.files?.[0]);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </div>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <span className="block text-xs text-white/80">{ui.gallery}</span>
+            <div className="rounded-xl border border-white/30 bg-black/20 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-xs text-white/65">{ui.galleryHint}</p>
+                <button
+                  type="button"
+                  onClick={() => galleryUploadRef.current?.click()}
+                  className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white"
+                >
+                  {ui.addGallery}
+                </button>
+              </div>
+              {galleryImages.length > 0 ? (
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {galleryImages.map((url, index) => (
+                    <div key={`gallery-${index}`} className="space-y-2 rounded-lg border border-white/20 bg-white/5 p-2">
+                      <img src={url} alt={`gallery-${index + 1}`} className="h-28 w-full rounded-md object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(index)}
+                        className="w-full rounded-lg bg-red-600 px-2 py-1.5 text-xs font-semibold text-white"
+                      >
+                        {ui.removeImage}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex h-20 items-center justify-center rounded-lg border border-dashed border-white/25 bg-black/20 text-sm text-white/50">
+                  {ui.noGallery}
+                </div>
+              )}
+              <input
+                ref={galleryUploadRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(event) => {
+                  void onUploadGallery(event.target.files);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </div>
+          </div>
           <Input label={ui.price} type="number" {...form.register("price", { valueAsNumber: true })} />
           <Input label={ui.studentLimit} type="number" {...form.register("studentLimit", { valueAsNumber: true })} />
           <Input label={ui.duration} {...form.register("duration")} />

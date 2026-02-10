@@ -77,6 +77,7 @@ export function UserForm({ onDone, lang = "ru" }: { onDone: () => void; lang?: A
   });
   const passwordValue = useWatch({ control: form.control, name: "password" }) || "";
   const passwordRules = evaluatePasswordRules(passwordValue);
+  const emailError = form.formState.errors.email?.message;
   const passwordError = form.formState.errors.password?.message;
   const unmetPasswordRules = [
     !passwordRules.minLength ? ui.ruleMin : null,
@@ -114,6 +115,7 @@ export function UserForm({ onDone, lang = "ru" }: { onDone: () => void; lang?: A
       <label>
         <span className="mb-1 block text-xs text-white/80">{ui.email}</span>
         <input {...form.register("email")} className="w-full rounded-xl border border-white/30 bg-black/20 px-3 py-2 text-sm text-white" />
+        {emailError ? <p className="mt-1 text-[11px] text-red-200">{emailError}</p> : null}
       </label>
       <label className="relative">
         <span className="mb-1 block text-xs text-white/80">{ui.password}</span>

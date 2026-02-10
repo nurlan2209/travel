@@ -100,7 +100,30 @@ export default function Team({ lang }: TeamProps) {
           <p className="text-lg text-[#0A1022]/70">{t.subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="no-scrollbar md:hidden -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+          {teamMembers.map((member) => (
+            <article key={`${member.id}-mobile`} className="team-card min-w-[84%] snap-center">
+              <div className="team-card__media">
+                <div className="team-card__image-wrap">
+                  <ImageWithFallback
+                    src={member.photoUrl}
+                    alt={pickName(member, lang)}
+                    className="team-card__image"
+                  />
+                  <div className="team-card__mask" />
+                  <h3 className="team-card__title team-card__title--overlay">{pickName(member, lang)}</h3>
+                </div>
+              </div>
+
+              <section className="team-card__content">
+                <h3 className="team-card__title">{pickName(member, lang)}</h3>
+                <p className="team-card__role">{pickRole(member, lang)}</p>
+              </section>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden max-w-6xl mx-auto gap-8 md:grid md:grid-cols-2 lg:grid-cols-3">
           {teamMembers.map((member) => (
             <article key={member.id} className="team-card">
               <div className="team-card__media">

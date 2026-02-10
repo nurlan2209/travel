@@ -19,7 +19,7 @@ export default function LandingPage() {
   const [currentLang, setCurrentLang] = useState<LandingLang>("ru");
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="theme-page-surface min-h-screen bg-white">
       <Header currentLang={currentLang} onLangChange={setCurrentLang} />
       <Hero lang={currentLang} />
       <Tours lang={currentLang} />

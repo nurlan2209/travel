@@ -19,9 +19,8 @@ export default async function StudentPortalLayout({ children }: { children: Reac
             <div className="flex items-center gap-5">
               <Link href="/" className="flex items-center gap-2">
               <div className="relative h-14 w-14">
-                <Image src="/logo_mnu.svg" alt="MNU logo" fill className="object-contain brightness-0" />
+                <Image src="/лого_mnutravel.svg" alt="Logo" fill className="object-contain brightness-0" />
               </div>
-              <span className="text-lg font-black">MNU Travel</span>
             </Link>
             <div className="glass-white flex items-center gap-2 rounded-xl px-1.5 py-1">
               <Link href="/student" className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0A1022]/90 transition hover:bg-white/70 hover:text-[#0D3B8E]">Мои туры</Link>

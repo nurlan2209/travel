@@ -8,6 +8,7 @@ import { signOut, useSession } from "next-auth/react";
 import type { AppLanguage } from "@/lib/constants";
 import { LanguageSwitcher } from "@/components/public/language-switcher";
 import { StudentAuthModal } from "@/components/public/student-auth-modal";
+import { ThemeToggle } from "@/components/public/theme-toggle";
 import { t } from "@/lib/i18n";
 
 export function SiteHeader({ lang }: { lang: AppLanguage }) {
@@ -20,7 +21,6 @@ export function SiteHeader({ lang }: { lang: AppLanguage }) {
   const navItems = [
     { href: "/#home", label: dict.navHome },
     { href: "/#tours", label: dict.navTours },
-    { href: "/#student-tours", label: dict.navStudentTours },
     { href: "/#documents", label: dict.navDocuments },
     { href: "/#about", label: dict.navAbout },
     { href: "/#contact", label: dict.navContact }
@@ -35,6 +35,7 @@ export function SiteHeader({ lang }: { lang: AppLanguage }) {
   const toursLabel = lang === "en" ? "My tours" : lang === "kz" ? "Менің турларым" : "Мои туры";
   const logoutLabel = lang === "en" ? "Sign out" : lang === "kz" ? "Шығу" : "Выйти";
   const studentDefault = lang === "en" ? "Student" : "Студент";
+  const languageLabel = lang === "en" ? "Language" : lang === "kz" ? "Тіл" : "Язык";
   const studentDisplayName = studentName || session?.user?.email?.split("@")[0] || studentDefault;
 
   useEffect(() => {
@@ -69,32 +70,35 @@ export function SiteHeader({ lang }: { lang: AppLanguage }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 liquid-nav-shell liquid-nav-shell--hero">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          <Link href="/#home" className="flex items-center space-x-3">
-            <div className="relative h-24 w-24">
-              <Image src="/logo_mnu.svg" alt="MNU logo" fill className="object-contain" />
-            </div>
-            <span className="text-xl font-bold text-white">MNU Travel</span>
-          </Link>
+        <div className="hidden h-20 items-center lg:flex">
+          <div className="flex w-[230px] items-center">
+            <Link href="/#home" className="flex items-center">
+              <div className="relative h-17 w-20">
+                <Image src="/лого_mnutravel.svg" alt="Logo" fill className="object-contain" />
+              </div>
+            </Link>
+          </div>
 
-          <nav className="hidden lg:block liquid-nav-group liquid-nav-group--light">
-            <span className="liquid-nav-group__backdrop" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--top" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--bottom" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--left" />
-            <span className="liquid-nav-group__edge liquid-nav-group__edge--right" />
-            <div className="liquid-nav-group__row">
-              {navItems.map((item) => (
-                <Link key={`${item.href}-${item.label}`} href={item.href} className="liquid-nav-group__item px-4 py-2 text-sm font-medium rounded-lg text-white hover:text-[#FFD428] transition-all duration-300">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
+          <div className="flex flex-1 justify-center">
+            <nav className="liquid-nav-group liquid-nav-group--light">
+              <span className="liquid-nav-group__backdrop" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--top" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--bottom" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--left" />
+              <span className="liquid-nav-group__edge liquid-nav-group__edge--right" />
+              <div className="liquid-nav-group__row">
+                {navItems.map((item) => (
+                  <Link key={`${item.href}-${item.label}`} href={item.href} className="liquid-nav-group__item rounded-lg px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:text-[#FFD428]">
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+          </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-[230px] items-center justify-end gap-3">
             {isStudent ? (
-              <div className="relative hidden lg:block" ref={profileMenuRef}>
+              <div className="relative" ref={profileMenuRef}>
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
@@ -132,15 +136,27 @@ export function SiteHeader({ lang }: { lang: AppLanguage }) {
                 ) : null}
               </div>
             ) : isAdminSide ? (
-              <Link href={quickHref} className="hidden rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/30 lg:inline-flex">
+              <Link href={quickHref} className="rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/30">
                 {quickLabel}
               </Link>
             ) : (
               <StudentAuthModal lang={lang} />
             )}
-            <div className="mr-2 hidden lg:block">
-              <LanguageSwitcher current={lang} variant="light" />
+
+            <ThemeToggle />
+            <LanguageSwitcher current={lang} variant="light" />
+          </div>
+        </div>
+
+        <div className="flex h-20 items-center justify-between lg:hidden">
+          <Link href="/#home" className="flex items-center">
+            <div className="relative h-17 w-20">
+              <Image src="/лого_mnutravel.svg" alt="Logo" fill className="object-contain" />
             </div>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="h-9 w-9" />
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -197,7 +213,7 @@ export function SiteHeader({ lang }: { lang: AppLanguage }) {
                 </button>
               )}
               <div className="mt-1 rounded-xl bg-white/10 px-2 py-2">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">Language</div>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">{languageLabel}</div>
                 <div className="inline-flex rounded-lg bg-black/25 p-1">
                   {(["kz", "ru", "en"] as const).map((item) => {
                     const href = `?lang=${item}`;

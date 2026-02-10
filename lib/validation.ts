@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { PASSWORD_MIN_LENGTH, evaluatePasswordRules } from "@/lib/password-rules";
 
+export const ALLOWED_EMAIL_DOMAINS = ["mnu.kz", "kazguu.kz"] as const;
+const allowedEmailDomainMessage = "Разрешены только домены @mnu.kz и @kazguu.kz";
+
+export function isAllowedEmailDomain(email: string) {
+  const normalized = email.trim().toLowerCase();
+  const domain = normalized.split("@")[1];
+  if (!domain) return false;
+  return ALLOWED_EMAIL_DOMAINS.includes(domain as (typeof ALLOWED_EMAIL_DOMAINS)[number]);
+}
+
 const passwordSchema = z
   .string()
   .min(PASSWORD_MIN_LENGTH, `Пароль должен содержать минимум ${PASSWORD_MIN_LENGTH} символов`)
@@ -12,6 +22,13 @@ const passwordSchema = z
   })
   .refine((value) => evaluatePasswordRules(value).hasDigit, {
     message: "Пароль должен содержать хотя бы одну цифру"
+  });
+
+const restrictedEmailSchema = z
+  .string()
+  .email()
+  .refine((value) => isAllowedEmailDomain(value), {
+    message: allowedEmailDomainMessage
   });
 
 export const posterFeatureBlockSchema = z.object({
@@ -92,14 +109,14 @@ export const posterSettingsSchema = z.object({
 });
 
 export const userCreateSchema = z.object({
-  email: z.string().email(),
+  email: restrictedEmailSchema,
   password: passwordSchema,
   role: z.enum(["ADMIN", "MANAGER", "STUDENT"]),
   isActive: z.boolean()
 });
 
 export const userUpdateSchema = z.object({
-  email: z.string().email().optional(),
+  email: restrictedEmailSchema.optional(),
   password: z.string().min(8).optional(),
   isActive: z.boolean().optional()
 });
@@ -136,7 +153,7 @@ export const studentRegisterSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(7),
   university: z.string().min(2),
-  email: z.string().email(),
+  email: restrictedEmailSchema,
   password: passwordSchema,
   confirmPassword: z.string().min(PASSWORD_MIN_LENGTH)
 }).refine((data) => data.password === data.confirmPassword, {
