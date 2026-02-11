@@ -90,13 +90,6 @@ export default function PaymentMethods({ lang }: PaymentMethodsProps) {
               );
             })}
           </div>
-
-          {/* Note */}
-          <div className="glass-card rounded-2xl p-6 text-center border border-white/60 shadow-lg">
-            <p className="text-[#0A1022]/70 leading-relaxed">
-              ℹ️ {t.note}
-            </p>
-          </div>
         </div>
       </div>
     </section>

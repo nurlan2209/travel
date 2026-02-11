@@ -52,7 +52,9 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
       duration: "Длительность",
       spots: "Лимит мест",
       apply: "Оставить заявку",
-      allTours: "Все туры"
+      allTours: "Все туры",
+      posters: "Постеры тура",
+      gallery: "Галерея"
     },
     en: {
       place: "Place",
@@ -62,16 +64,16 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
       duration: "Duration",
       spots: "Seat limit",
       apply: "Apply now",
-      allTours: "All tours"
+      allTours: "All tours",
+      posters: "Tour posters",
+      gallery: "Gallery"
     }
   }[lang];
 
   const tour = await prisma.tourPost.findUnique({
     where: { slug },
     include: {
-      translations: {
-        where: { language: mapLangToPrismaEnum(lang) }
-      }
+      translations: true
     }
   });
 
@@ -90,7 +92,18 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
     }
   }
 
-  const translation = tour.translations[0];
+  const translation = tour.translations.find((item) => item.language === mapLangToPrismaEnum(lang)) ?? tour.translations[0];
+  const posterUrls = Array.from(
+    new Set(
+      tour.translations
+        .flatMap((item) => {
+          const data = item.posterTemplateData as { posterUrls?: string[] } | null;
+          return Array.isArray(data?.posterUrls) ? data.posterUrls : [];
+        })
+        .filter(Boolean)
+    )
+  );
+
   return (
     <main className="theme-page-surface theme-tour-page min-h-screen bg-[linear-gradient(180deg,#ffffff_0%,#fff7da_100%)] text-[#0A1022]">
       <SiteHeader lang={lang} />
@@ -169,6 +182,42 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
           </div>
         </div>
       </section>
+
+      {posterUrls.length > 0 ? (
+        <section className="mx-auto -mt-6 max-w-6xl px-4 pb-12 sm:px-6 lg:px-8">
+          <div className="glass-white-strong rounded-3xl border border-white/90 p-6">
+            <h2 className="mb-4 text-2xl font-black">{ui.posters}</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {posterUrls.map((url, idx) => (
+                <img
+                  key={`${url}-${idx}`}
+                  src={url}
+                  alt={`${translation?.title ?? tour.place}-poster-${idx + 1}`}
+                  className="h-64 w-full rounded-2xl object-cover shadow-sm"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {tour.gallery.length > 0 ? (
+        <section className="mx-auto -mt-6 max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="glass-white-strong rounded-3xl border border-white/90 p-6">
+            <h2 className="mb-4 text-2xl font-black">{ui.gallery}</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {tour.gallery.map((url, idx) => (
+                <img
+                  key={`${url}-${idx}`}
+                  src={url}
+                  alt={`${translation?.title ?? tour.place}-gallery-${idx + 1}`}
+                  className="h-56 w-full rounded-2xl object-cover shadow-sm"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

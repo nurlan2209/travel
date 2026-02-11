@@ -158,7 +158,7 @@ const tourFormUi = {
     sectionBasics: "Негізгі",
     sectionMedia: "Баннер, галерея және баға",
     studentLimit: "Студенттер лимиті",
-    sectionSchedule: "Кездесу және орын",
+    sectionSchedule: "Тур логистикасы",
     sectionTranslations: "Мәтін аудармалары",
     sectionPosters: "Постерлер (әр тілге бірнеше)",
     slug: "Slug",
@@ -169,18 +169,15 @@ const tourFormUi = {
     gallery: "Тур фотолары",
     price: "Бағасы",
     duration: "Ұзақтығы",
-    meetingTime: "Жиналу уақыты",
+    meetingTime: "Жиналу уақыты/орны",
     tourDate: "Тур күні",
-    place: "Орын",
-    location: "Локация",
+    place: "Қайда барамыз (маршрут/орын)",
+    location: "Аймақ/қала",
+    meetingTimePlaceholder: "Мысалы: 08:30, бас қақпа",
+    placePlaceholder: "Мысалы: Түркістан, Қ.А. Ясауи кесенесі",
+    locationPlaceholder: "Мысалы: Түркістан облысы",
     title: "Тақырып",
     description: "Сипаттама",
-    fillRuFirst: "Алдымен RU өрістерін толтырыңыз (кемі title және description).",
-    overwriteConfirm: "KZ/EN мәтіні бар. Қайта аудару керек пе?",
-    translating: "Аударылуда...",
-    translateBtn: "RU -> KZ/EN аудару",
-    translationError: "Аударма қатесі.",
-    translationFailed: "Аударманы орындау мүмкін болмады.",
     postersWarning: "Жариялау үшін барлық 3 тілге кемі 1 постер жүктеген дұрыс.",
     publishWithoutPosters: "Кей тілдерде постерлер жоқ. Ескертуімен жариялау керек пе?",
     posterUploadFailed: "Постер жүктеу сәтсіз аяқталды.",
@@ -208,7 +205,7 @@ const tourFormUi = {
     sectionBasics: "Основное",
     sectionMedia: "Баннер, галерея и цена",
     studentLimit: "Лимит студентов",
-    sectionSchedule: "Встреча и место",
+    sectionSchedule: "Логистика тура",
     sectionTranslations: "Текст и перевод",
     sectionPosters: "Постеры (несколько на язык)",
     slug: "Slug",
@@ -219,18 +216,15 @@ const tourFormUi = {
     gallery: "Фотографии тура",
     price: "Цена",
     duration: "Длительность",
-    meetingTime: "Время сбора",
+    meetingTime: "Время/место сбора",
     tourDate: "Дата тура",
-    place: "Место",
-    location: "Локация",
+    place: "Куда едем (место/маршрут)",
+    location: "Регион/город",
+    meetingTimePlaceholder: "Например: 08:30, центральный вход",
+    placePlaceholder: "Например: Туркестан, мавзолей Яссауи",
+    locationPlaceholder: "Например: Туркестанская область",
     title: "Название",
     description: "Описание",
-    fillRuFirst: "Сначала заполните RU поля (минимум title и description).",
-    overwriteConfirm: "KZ/EN уже содержат текст. Перезаписать переводом?",
-    translating: "Перевод...",
-    translateBtn: "Перевести RU -> KZ/EN",
-    translationError: "Ошибка перевода.",
-    translationFailed: "Не удалось выполнить перевод.",
     postersWarning: "Для публикации лучше загрузить хотя бы 1 постер для всех 3 языков.",
     publishWithoutPosters: "В некоторых языках нет постеров. Публиковать с предупреждением?",
     posterUploadFailed: "Не удалось загрузить постер.",
@@ -258,7 +252,7 @@ const tourFormUi = {
     sectionBasics: "Basics",
     sectionMedia: "Banner, gallery and price",
     studentLimit: "Student limit",
-    sectionSchedule: "Meeting and place",
+    sectionSchedule: "Tour logistics",
     sectionTranslations: "Text and translation",
     sectionPosters: "Posters (multiple per language)",
     slug: "Slug",
@@ -269,18 +263,15 @@ const tourFormUi = {
     gallery: "Tour photos",
     price: "Price",
     duration: "Duration",
-    meetingTime: "Meeting time",
+    meetingTime: "Meeting time/place",
     tourDate: "Tour date",
-    place: "Place",
-    location: "Location",
+    place: "Destination (route/place)",
+    location: "Region/city",
+    meetingTimePlaceholder: "e.g. 08:30, main entrance",
+    placePlaceholder: "e.g. Turkistan, Yasawi Mausoleum",
+    locationPlaceholder: "e.g. Turkistan Region",
     title: "Title",
     description: "Description",
-    fillRuFirst: "Fill RU fields first (at least title and description).",
-    overwriteConfirm: "KZ/EN already has text. Overwrite by translation?",
-    translating: "Translating...",
-    translateBtn: "Translate RU -> KZ/EN",
-    translationError: "Translation error.",
-    translationFailed: "Translation failed.",
     postersWarning: "For publishing, upload at least one poster for all 3 languages.",
     publishWithoutPosters: "Some languages have no posters. Publish anyway?",
     posterUploadFailed: "Poster upload failed.",
@@ -309,7 +300,6 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
   const ui = tourFormUi[lang];
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [translating, setTranslating] = useState(false);
   const uploadRefs = {
     ru: useRef<HTMLInputElement | null>(null),
     kz: useRef<HTMLInputElement | null>(null),
@@ -418,61 +408,6 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
       setError(ui.mediaUploadFailed);
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function onTranslate() {
-    const ru = form.getValues("translations.ru");
-
-    if (!ru.title || !ru.description) {
-      setError(ui.fillRuFirst);
-      return;
-    }
-
-    const kz = form.getValues("translations.kz");
-    const en = form.getValues("translations.en");
-    const hasExisting = Boolean(kz.title || kz.description || en.title || en.description);
-
-    if (hasExisting) {
-      const confirmed = window.confirm(ui.overwriteConfirm);
-      if (!confirmed) return;
-    }
-
-    setTranslating(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/admin/tours/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ru })
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.message || ui.translationFailed);
-        setTranslating(false);
-        return;
-      }
-
-      form.setValue("translations.kz", {
-        ...data.kz,
-        posterTemplateData: {
-          ...normalizePosterTemplateData(data.kz.posterTemplateData),
-          posterUrls: posterUrlsByLang.kz
-        }
-      });
-      form.setValue("translations.en", {
-        ...data.en,
-        posterTemplateData: {
-          ...normalizePosterTemplateData(data.en.posterTemplateData),
-          posterUrls: posterUrlsByLang.en
-        }
-      });
-    } catch {
-      setError(ui.translationError);
-    } finally {
-      setTranslating(false);
     }
   }
 
@@ -722,25 +657,15 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
       <section className="space-y-3 rounded-2xl border border-white/20 bg-white/8 p-4">
         <h3 className="text-sm font-bold uppercase tracking-wider text-white/90">{ui.sectionSchedule}</h3>
         <div className="grid gap-3 md:grid-cols-2">
-          <Input label={ui.meetingTime} {...form.register("meetingTime")} />
+          <Input label={ui.meetingTime} placeholder={ui.meetingTimePlaceholder} {...form.register("meetingTime")} />
           <Input label={ui.tourDate} type="date" {...form.register("tourDate")} />
-          <Input label={ui.place} {...form.register("place")} />
-          <Input label={ui.location} {...form.register("location")} />
+          <Input label={ui.place} placeholder={ui.placePlaceholder} {...form.register("place")} />
+          <Input label={ui.location} placeholder={ui.locationPlaceholder} {...form.register("location")} />
         </div>
       </section>
 
       <section className="space-y-3 rounded-2xl border border-white/20 bg-white/8 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-white/90">{ui.sectionTranslations}</h3>
-          <button
-            type="button"
-            onClick={onTranslate}
-            disabled={translating}
-            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-          >
-            {translating ? ui.translating : ui.translateBtn}
-          </button>
-        </div>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-white/90">{ui.sectionTranslations}</h3>
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-xl border border-white/20 bg-black/20 p-3">
             <h4 className="mb-2 text-sm font-bold uppercase text-white">RU</h4>

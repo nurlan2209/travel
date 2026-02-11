@@ -17,6 +17,7 @@ type TourApiItem = {
   tourDate: string;
   location: string;
   place: string;
+  studentLimit: number;
   coverImage: string;
   translation: {
     title: string;
@@ -27,76 +28,18 @@ type TourApiItem = {
   } | null;
 };
 
-const fallbackTours = [
-  {
-    id: "fallback-1",
-    slug: "kolsai-lakes",
-    title: { kz: "Көлсай көлдері", ru: "Кольсайские озера", en: "Kolsai Lakes" },
-    duration: "3 дня",
-    date: "15-17 марта",
-    location: { kz: "Алматы облысы", ru: "Алматинская область", en: "Almaty Region" },
-    description: {
-      kz: "Таулы көлдердің әдемілігін тамашалаңыз",
-      ru: "Насладитесь красотой горных озер",
-      en: "Enjoy the beauty of mountain lakes"
-    },
-    price: "35 000 ₸",
-    participants: "15-20",
-    coverImage:
-      "https://images.unsplash.com/photo-1686645995031-35ca3a653af5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-  },
-  {
-    id: "fallback-2",
-    slug: "turkistan",
-    title: { kz: "Түркістан туры", ru: "Тур в Туркестан", en: "Turkistan Tour" },
-    duration: "2 дня",
-    date: "22-23 марта",
-    location: { kz: "Түркістан", ru: "Туркестан", en: "Turkistan" },
-    description: {
-      kz: "Түркістанның тарихын және мәдениетін ашыңыз",
-      ru: "Откройте историю и культуру Туркестана",
-      en: "Discover Turkistan's history and culture"
-    },
-    price: "32 990 ₸",
-    participants: "20-30",
-    coverImage:
-      "https://images.unsplash.com/photo-1531736275454-b53d9c302f92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-  },
-  {
-    id: "fallback-3",
-    slug: "borovoe",
-    title: { kz: "Бурабай туры", ru: "Тур в Боровое", en: "Borovoe Tour" },
-    duration: "2 дня",
-    date: "5-6 апреля",
-    location: { kz: "Бурабай", ru: "Боровое", en: "Borovoe" },
-    description: {
-      kz: "Орман, көл және тау атмосферасы",
-      ru: "Атмосфера леса, озер и гор",
-      en: "Forest, lakes and mountain atmosphere"
-    },
-    price: "42 000 ₸",
-    participants: "20-30",
-    coverImage:
-      "https://images.unsplash.com/photo-1483721310020-03333e577078?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-  },
-  {
-    id: "fallback-4",
-    slug: "mangystau",
-    title: { kz: "Маңғыстау туры", ru: "Тур в Мангистау", en: "Mangystau Tour" },
-    duration: "5 дней",
-    date: "10-14 апреля",
-    location: { kz: "Маңғыстау", ru: "Мангистау", en: "Mangystau" },
-    description: {
-      kz: "Қазақстанның ең ерекше табиғи пейзаждары",
-      ru: "Самые необычные природные пейзажи Казахстана",
-      en: "Kazakhstan's most unique landscapes"
-    },
-    price: "75 000 ₸",
-    participants: "15-25",
-    coverImage:
-      "https://images.unsplash.com/photo-1472396961693-142e6e269027?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-  }
-];
+const fallbackTours: Array<{
+  id: string;
+  slug: string;
+  title: { kz: string; ru: string; en: string };
+  duration: string;
+  date: string;
+  location: { kz: string; ru: string; en: string };
+  description: { kz: string; ru: string; en: string };
+  price: string;
+  participants: string;
+  coverImage: string;
+}> = [];
 
 export default function Tours({ lang }: ToursProps) {
   const [apiTours, setApiTours] = useState<TourApiItem[]>([]);
@@ -126,7 +69,6 @@ export default function Tours({ lang }: ToursProps) {
       from: "бастап",
       details: "Толығырақ",
       participants: "Қатысушылар",
-      posterMode: "Постер режимі",
       viewMore: "Көбірек көру"
     },
     ru: {
@@ -135,7 +77,6 @@ export default function Tours({ lang }: ToursProps) {
       from: "от",
       details: "Подробнее",
       participants: "Участники",
-      posterMode: "Режим постеров",
       viewMore: "Посмотреть еще"
     },
     en: {
@@ -144,7 +85,6 @@ export default function Tours({ lang }: ToursProps) {
       from: "from",
       details: "Learn More",
       participants: "Participants",
-      posterMode: "Poster mode",
       viewMore: "View more"
     }
   };
@@ -162,7 +102,7 @@ export default function Tours({ lang }: ToursProps) {
     location: tour.location,
     description: tour.translation?.description ?? tour.place,
     price: `${new Intl.NumberFormat(lang === "en" ? "en-US" : "ru-RU").format(tour.price)} ₸`,
-    participants: "15-30"
+    participants: String(tour.studentLimit)
   }));
 
   const data = toursFromApi.length > 0
@@ -250,11 +190,7 @@ export default function Tours({ lang }: ToursProps) {
                     </div>
                   </div>
 
-                  {!hasPosters ? (
-                    <p className="mb-4 line-clamp-2 text-sm text-[#0A1022]/60">{tour.description}</p>
-                  ) : (
-                    <p className="mb-4 text-xs text-[#0A1022]/60">{t.posterMode}</p>
-                  )}
+                  <p className="mb-4 line-clamp-2 text-sm text-[#0A1022]/60">{tour.description}</p>
 
                   <div className="flex items-center justify-between">
                     <div>
@@ -286,4 +222,3 @@ export default function Tours({ lang }: ToursProps) {
     </section>
   );
 }
-

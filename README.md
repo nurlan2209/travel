@@ -8,7 +8,6 @@ Next.js 16 + TypeScript project with:
 - NextAuth credentials auth
 - Cloudinary signed upload API
 - i18n content fields for `KZ` (default), `RU`, `EN`
-- RU -> KZ/EN auto-translation workflow (OpenAI)
 - Poster A/B generation (`1080x1350`) from template data
 - Student portal (`/student`) with profile, my tours, and “best moments”
 - Password reset via email with 6-digit code
@@ -29,7 +28,6 @@ Set real values in `.env`:
 - `DATABASE_URL`
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
-- `OPENAI_API_KEY`
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
 - `CLOUDINARY_CLOUD_NAME`
