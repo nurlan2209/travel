@@ -9,6 +9,7 @@ const adminDictionary = {
     navUsers: "Пайдаланушылар",
     navTeam: "Команда",
     navMoments: "Сәттер",
+    navDocuments: "Құжаттар",
     signOut: "Шығу",
     dashboardTitle: "Басқару панелі",
     signedInAs: "Кірген пайдаланушы",
@@ -35,7 +36,8 @@ const adminDictionary = {
     usersTitle: "Пайдаланушылар",
     applicationsTitle: "Өтінімдер",
     teamTitle: "Команда",
-    manageTeam: "Команда карточкаларын басқару"
+    manageTeam: "Команда карточкаларын басқару",
+    documentsTitle: "Құжаттар"
   },
   ru: {
     navAdmin: "Админ",
@@ -44,6 +46,7 @@ const adminDictionary = {
     navUsers: "Пользователи",
     navTeam: "Команда",
     navMoments: "Моменты",
+    navDocuments: "Документы",
     signOut: "Выйти",
     dashboardTitle: "Панель управления",
     signedInAs: "Вы вошли как",
@@ -70,7 +73,8 @@ const adminDictionary = {
     usersTitle: "Пользователи",
     applicationsTitle: "Заявки",
     teamTitle: "Команда",
-    manageTeam: "Управление карточками команды"
+    manageTeam: "Управление карточками команды",
+    documentsTitle: "Документы"
   },
   en: {
     navAdmin: "Admin",
@@ -79,6 +83,7 @@ const adminDictionary = {
     navUsers: "Users",
     navTeam: "Team",
     navMoments: "Moments",
+    navDocuments: "Documents",
     signOut: "Sign out",
     dashboardTitle: "Control panel",
     signedInAs: "Signed in as",
@@ -105,7 +110,8 @@ const adminDictionary = {
     usersTitle: "Users",
     applicationsTitle: "Applications",
     teamTitle: "Team",
-    manageTeam: "Manage team cards"
+    manageTeam: "Manage team cards",
+    documentsTitle: "Documents"
   }
 } as const;
 

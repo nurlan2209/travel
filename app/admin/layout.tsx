@@ -27,6 +27,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <Link href="/admin/applications" className="text-sm text-white/90">{dict.navApplications}</Link>
             <Link href="/admin/team" className="text-sm text-white/90">{dict.navTeam}</Link>
             <Link href="/admin/moments" className="text-sm text-white/90">{dict.navMoments}</Link>
+            {session.user.role === "ADMIN" ? <Link href="/admin/documents" className="text-sm text-white/90">{dict.navDocuments}</Link> : null}
             {session.user.role === "ADMIN" ? <Link href="/admin/users" className="text-sm text-white/90">{dict.navUsers}</Link> : null}
           </div>
           <div className="flex items-center gap-3">

@@ -163,6 +163,30 @@ export const teamMemberUpdateSchema = z.object({
   isActive: z.boolean().optional()
 });
 
+export const siteDocumentCreateSchema = z.object({
+  titleRu: z.string().min(2),
+  titleKz: z.string().min(2),
+  titleEn: z.string().min(2),
+  descriptionRu: z.string().min(2),
+  descriptionKz: z.string().min(2),
+  descriptionEn: z.string().min(2),
+  fileUrl: z.string().url(),
+  sortOrder: z.number().int().min(0).optional().default(0),
+  isActive: z.boolean().optional().default(true)
+});
+
+export const siteDocumentUpdateSchema = z.object({
+  titleRu: z.string().min(2).optional(),
+  titleKz: z.string().min(2).optional(),
+  titleEn: z.string().min(2).optional(),
+  descriptionRu: z.string().min(2).optional(),
+  descriptionKz: z.string().min(2).optional(),
+  descriptionEn: z.string().min(2).optional(),
+  fileUrl: z.string().url().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional()
+});
+
 export const studentRegisterSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(7),

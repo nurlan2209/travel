@@ -133,6 +133,24 @@ model TeamMember {
   updatedAt  DateTime @updatedAt
 }
 
+model SiteDocument {
+  id            String   @id @default(cuid())
+  titleRu       String
+  titleKz       String
+  titleEn       String
+  descriptionRu String
+  descriptionKz String
+  descriptionEn String
+  fileUrl       String
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([sortOrder, createdAt])
+  @@index([isActive, sortOrder, createdAt])
+}
+
 model StudentProfile {
   id          String   @id @default(cuid())
   userId      String   @unique

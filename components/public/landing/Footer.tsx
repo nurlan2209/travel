@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Instagram, Mail, Phone } from "lucide-react";
 
 interface FooterProps {
   lang: "kz" | "ru" | "en";
@@ -20,7 +20,6 @@ export default function Footer({ lang }: FooterProps) {
         { label: "Байланыс", id: "contact" }
       ],
       contacts: "Байланыс",
-      city: "Алматы, Қазақстан",
       rights: "© 2026. Барлық құқықтар қорғалған."
     },
     ru: {
@@ -34,7 +33,6 @@ export default function Footer({ lang }: FooterProps) {
         { label: "Контакты", id: "contact" }
       ],
       contacts: "Контакты",
-      city: "Алматы, Казахстан",
       rights: "© 2026. Все права защищены."
     },
     en: {
@@ -48,7 +46,6 @@ export default function Footer({ lang }: FooterProps) {
         { label: "Contacts", id: "contact" }
       ],
       contacts: "Contacts",
-      city: "Almaty, Kazakhstan",
       rights: "© 2026. All rights reserved."
     }
   };
@@ -109,10 +106,6 @@ export default function Footer({ lang }: FooterProps) {
           <div>
             <h4 className="mb-4 text-lg font-bold">{t.contacts}</h4>
             <div className="space-y-4 text-sm text-white/75">
-              <div className="flex items-center gap-2">
-                <MapPin size={18} className="text-[#FFD428]" />
-                <span>{t.city}</span>
-              </div>
               <div className="flex items-start gap-2">
                 <Phone size={18} className="mt-0.5 text-[#FFD428]" />
                 <div className="space-y-1">
