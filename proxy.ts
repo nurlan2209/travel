@@ -5,14 +5,8 @@ import { getToken } from "next-auth/jwt";
 export async function proxy(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   const isStudentRoute = request.nextUrl.pathname.startsWith("/student");
-  const isStudentPublicRoute =
-    request.nextUrl.pathname === "/student/forgot-password";
 
   if (!isAdminRoute && !isStudentRoute) {
-    return NextResponse.next();
-  }
-
-  if (isStudentPublicRoute) {
     return NextResponse.next();
   }
 

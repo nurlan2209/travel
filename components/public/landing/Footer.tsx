@@ -15,8 +15,8 @@ export default function Footer({ lang }: FooterProps) {
       links: [
         { label: "Басты", id: "home" },
         { label: "Турлар", id: "tours" },
-        { label: "Құжаттар", id: "documents" },
         { label: "Біз туралы", id: "about" },
+        { label: "Құжаттар", id: "documents" },
         { label: "Байланыс", id: "contact" }
       ],
       contacts: "Байланыс",
@@ -29,8 +29,8 @@ export default function Footer({ lang }: FooterProps) {
       links: [
         { label: "Главная", id: "home" },
         { label: "Туры", id: "tours" },
-        { label: "Документы", id: "documents" },
         { label: "О нас", id: "about" },
+        { label: "Документы", id: "documents" },
         { label: "Контакты", id: "contact" }
       ],
       contacts: "Контакты",
@@ -43,8 +43,8 @@ export default function Footer({ lang }: FooterProps) {
       links: [
         { label: "Home", id: "home" },
         { label: "Tours", id: "tours" },
-        { label: "Documents", id: "documents" },
         { label: "About", id: "about" },
+        { label: "Documents", id: "documents" },
         { label: "Contacts", id: "contact" }
       ],
       contacts: "Contacts",

@@ -110,8 +110,8 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
 
   const translations = {
     kz: {
-      nav: ["Басты", "Турлар", "Құжаттар", "Біз туралы", "Байланыс"],
-      navIds: ["home", "tours", "documents", "about", "contact"],
+      nav: ["Басты", "Турлар", "Біз туралы", "Құжаттар", "Байланыс"],
+      navIds: ["home", "tours", "about", "documents", "contact"],
       language: "Тіл",
       login: "Кіру",
       profile: "Профиль",
@@ -121,8 +121,8 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
       studentDefault: "Студент"
     },
     ru: {
-      nav: ["Главная", "Туры", "Документы", "О нас", "Контакты"],
-      navIds: ["home", "tours", "documents", "about", "contact"],
+      nav: ["Главная", "Туры", "О нас", "Документы", "Контакты"],
+      navIds: ["home", "tours", "about", "documents", "contact"],
       language: "Язык",
       login: "Войти",
       profile: "Профиль",
@@ -132,8 +132,8 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
       studentDefault: "Студент"
     },
     en: {
-      nav: ["Home", "Tours", "Documents", "About", "Contacts"],
-      navIds: ["home", "tours", "documents", "about", "contact"],
+      nav: ["Home", "Tours", "About", "Documents", "Contacts"],
+      navIds: ["home", "tours", "about", "documents", "contact"],
       language: "Language",
       login: "Sign in",
       profile: "Profile",

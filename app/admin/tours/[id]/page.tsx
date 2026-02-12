@@ -62,6 +62,12 @@ export default async function EditTourPage({ params }: Props) {
                 priceLabel: string;
                 registerNote: string;
               };
+              tourDetails: {
+                included: string[];
+                excluded: string[];
+                plan: Array<{ title: string; description: string }>;
+              };
+              posterUrls?: string[];
             }
           }))
         }}

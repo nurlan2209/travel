@@ -15,18 +15,6 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     question: {
-      kz: 'Турларға қандай жастағы студенттер қатыса алады?',
-      ru: 'Студенты какого возраста могут участвовать в турах?',
-      en: 'What age students can participate in tours?'
-    },
-    answer: {
-      kz: 'Біздің турларға 18-тен 30 жасқа дейінгі студенттер қатыса алады. Кейбір турларда жас шектеуі болмауы мүмкін.',
-      ru: 'В наших турах могут участвовать студенты от 18 до 30 лет. Некоторые туры могут не иметь возрастных ограничений.',
-      en: 'Students aged 18 to 30 can participate in our tours. Some tours may have no age restrictions.'
-    }
-  },
-  {
-    question: {
       kz: 'Турға қандай құжаттар қажет?',
       ru: 'Какие документы нужны для тура?',
       en: 'What documents are needed for the tour?'
@@ -118,50 +106,57 @@ export default function FAQ({ lang }: FAQProps) {
   };
 
   const t = translations[lang];
+  const midpoint = Math.ceil(faqData.length / 2);
+  const columns = [faqData.slice(0, midpoint), faqData.slice(midpoint)];
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
-    <section id="faq" className="py-20 bg-gradient-to-b from-white to-[#FFF9DF]">
+    <section id="faq" className="py-20 bg-[#FFF9DF]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#0A1022] mb-4">{t.title}</h2>
+        <div className="mb-14 text-center">
+          <h2 className="mb-4 text-4xl font-bold text-[#0A1022] md:text-5xl">{t.title}</h2>
           <p className="text-lg text-[#0A1022]/70">{t.subtitle}</p>
         </div>
 
-        {/* FAQ Items */}
-        <div className="max-w-3xl mx-auto space-y-4">
-          {faqData.map((item, index) => (
-            <div
-              key={index}
-              className="glass-card rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-white/60"
-            >
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/40 transition-colors"
-              >
-                <span className="text-lg font-semibold text-[#0A1022] pr-4">
-                  {item.question[lang]}
-                </span>
-                <ChevronDown
-                  size={24}
-                  className={`text-[#0D3B8E] flex-shrink-0 transition-transform duration-300 ${
-                    openIndex === index ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  openIndex === index ? 'max-h-96' : 'max-h-0'
-                }`}
-              >
-                <div className="px-6 pb-5 pt-2 text-[#0A1022]/70 leading-relaxed bg-white/20 backdrop-blur-sm">
-                  {item.answer[lang]}
-                </div>
-              </div>
+        <div className="mx-auto grid max-w-6xl gap-5 md:grid-cols-2">
+          {columns.map((column, columnIndex) => (
+            <div key={`faq-col-${columnIndex}`} className="glass-white-strong overflow-hidden rounded-3xl border border-white/85">
+              {column.map((item, index) => {
+                const absoluteIndex = columnIndex * midpoint + index;
+                return (
+                  <div
+                    key={absoluteIndex}
+                    className={`bg-white/40 ${index !== column.length - 1 ? "border-b border-[#0A1022]/10" : ""}`}
+                  >
+                    <button
+                      onClick={() => toggleFAQ(absoluteIndex)}
+                      className="flex w-full items-center justify-between px-6 py-5 text-left transition-colors hover:bg-white/50"
+                    >
+                      <span className="pr-4 text-lg font-semibold text-[#0A1022]">
+                        {item.question[lang]}
+                      </span>
+                      <ChevronDown
+                        size={20}
+                        className={`shrink-0 text-[#0D3B8E] transition-transform duration-300 ${
+                          openIndex === absoluteIndex ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        openIndex === absoluteIndex ? 'max-h-80' : 'max-h-0'
+                      }`}
+                    >
+                      <div className="px-6 pb-5 pt-1 text-[#0A1022]/70 leading-relaxed">
+                        {item.answer[lang]}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>

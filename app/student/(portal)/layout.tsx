@@ -19,7 +19,7 @@ export default async function StudentPortalLayout({ children }: { children: Reac
             <div className="flex items-center gap-5">
               <Link href="/" className="flex items-center gap-2">
               <div className="relative h-14 w-14">
-                <Image src="/лого_mnutravel.svg" alt="Logo" fill className="object-contain brightness-0" />
+                <Image src="/лого_mnutravel.svg" alt="Logo" fill className="object-contain" />
               </div>
             </Link>
             <div className="glass-white flex items-center gap-2 rounded-xl px-1.5 py-1">

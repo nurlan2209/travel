@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import type { AppLanguage } from "@/lib/constants";
 import { evaluatePasswordRules } from "@/lib/password-rules";
 
@@ -57,6 +57,17 @@ const ui = {
     ruleLower: "1 кіші әріп",
     ruleUpper: "1 бас әріп",
     ruleDigit: "1 сан",
+    forgotTitle: "Құпиясөзді қалпына келтіру",
+    forgotSubtitle: "Email енгізіңіз, код жібереміз",
+    codeLabel: "6 таңбалы код",
+    newPassword: "Жаңа құпиясөз",
+    sendCode: "Код жіберу",
+    sendingCode: "Жіберілуде...",
+    updatePassword: "Құпиясөзді жаңарту",
+    updatingPassword: "Жаңартылуда...",
+    codeSent: "Код email-ге жіберілді",
+    resetDone: "Құпиясөз жаңартылды. Енді кіре аласыз.",
+    backToLogin: "Кіруге оралу",
     createBtn: "Аккаунт жасау",
     creatingBtn: "Жасалуда..."
   },
@@ -83,6 +94,17 @@ const ui = {
     ruleLower: "1 строчная буква",
     ruleUpper: "1 заглавная буква",
     ruleDigit: "1 цифра",
+    forgotTitle: "Восстановление пароля",
+    forgotSubtitle: "Введите email, отправим код",
+    codeLabel: "6-значный код",
+    newPassword: "Новый пароль",
+    sendCode: "Отправить код",
+    sendingCode: "Отправка...",
+    updatePassword: "Обновить пароль",
+    updatingPassword: "Обновление...",
+    codeSent: "Код отправлен на почту",
+    resetDone: "Пароль обновлен. Теперь можно войти.",
+    backToLogin: "Вернуться ко входу",
     createBtn: "Создать аккаунт",
     creatingBtn: "Создание..."
   },
@@ -109,6 +131,17 @@ const ui = {
     ruleLower: "1 lowercase letter",
     ruleUpper: "1 uppercase letter",
     ruleDigit: "1 number",
+    forgotTitle: "Reset password",
+    forgotSubtitle: "Enter your email to receive code",
+    codeLabel: "6-digit code",
+    newPassword: "New password",
+    sendCode: "Send code",
+    sendingCode: "Sending...",
+    updatePassword: "Update password",
+    updatingPassword: "Updating...",
+    codeSent: "Code sent to your email",
+    resetDone: "Password updated. You can sign in now.",
+    backToLogin: "Back to sign in",
     createBtn: "Create an account",
     creatingBtn: "Creating..."
   }
@@ -125,10 +158,17 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
   const [formAnimKey, setFormAnimKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"request" | "confirm">("request");
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [reg, setReg] = useState<RegisterState>(initialRegister);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotCode, setForgotCode] = useState("");
+  const [forgotPassword, setForgotPassword] = useState("");
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState("");
   const hasAutoOpenedRef = useRef(false);
   const regPasswordRules = evaluatePasswordRules(reg.password);
   const regPasswordMissing = [
@@ -138,13 +178,31 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
     !regPasswordRules.hasDigit ? text.ruleDigit : null
   ].filter(Boolean) as string[];
   const showRegisterPasswordHint = reg.password.length > 0 && regPasswordMissing.length > 0;
+  const forgotPasswordRules = evaluatePasswordRules(forgotPassword);
+  const forgotPasswordMissing = [
+    !forgotPasswordRules.minLength ? text.ruleMin : null,
+    !forgotPasswordRules.hasLower ? text.ruleLower : null,
+    !forgotPasswordRules.hasUpper ? text.ruleUpper : null,
+    !forgotPasswordRules.hasDigit ? text.ruleDigit : null
+  ].filter(Boolean) as string[];
+  const showForgotPasswordHint = forgotPassword.length > 0 && forgotPasswordMissing.length > 0;
 
-  function openModal(reason: OpenReason = "default") {
+  const resetForgotState = useCallback(() => {
+    setForgotMode(false);
+    setForgotStep("request");
+    setForgotCode("");
+    setForgotPassword("");
+    setForgotConfirmPassword("");
+  }, []);
+
+  const openModal = useCallback((reason: OpenReason = "default") => {
     setOpenReason(reason);
     setMounted(true);
     setError("");
+    setNotice("");
+    resetForgotState();
     requestAnimationFrame(() => setVisible(true));
-  }
+  }, [resetForgotState]);
 
   function closeModal() {
     setVisible(false);
@@ -160,6 +218,9 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
   function switchTab(next: "login" | "register") {
     if (next === tab) return;
     setTab(next);
+    setError("");
+    setNotice("");
+    resetForgotState();
     setFormAnimKey((prev) => prev + 1);
   }
 
@@ -168,13 +229,16 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
       const custom = event as CustomEvent<{ reason?: string }>;
       const reason = custom.detail?.reason === "application" ? "application" : "default";
       setTab("login");
+      setError("");
+      setNotice("");
+      resetForgotState();
       setFormAnimKey((prev) => prev + 1);
       openModal(reason);
     }
 
     window.addEventListener("mnu:open-auth-modal", onOpenModal as EventListener);
     return () => window.removeEventListener("mnu:open-auth-modal", onOpenModal as EventListener);
-  }, []);
+  }, [openModal, resetForgotState]);
 
   useEffect(() => {
     if (authQuery === "1" && !hasAutoOpenedRef.current) {
@@ -187,12 +251,13 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
     if (authQuery !== "1") {
       hasAutoOpenedRef.current = false;
     }
-  }, [authQuery]);
+  }, [authQuery, openModal]);
 
   async function onLogin(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setNotice("");
 
     const result = await signIn("credentials", {
       email: loginEmail,
@@ -228,6 +293,7 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setNotice("");
 
     const response = await fetch("/api/student/register", {
       method: "POST",
@@ -272,18 +338,88 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
     window.location.href = "/admin/applications";
   }
 
+  async function onForgotRequest(event: FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    setNotice("");
+
+    const response = await fetch("/api/student/password/request-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: forgotEmail.trim() })
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as { message?: string };
+    if (!response.ok) {
+      setError(payload.message || text.invalidLogin);
+      setLoading(false);
+      return;
+    }
+
+    setNotice(text.codeSent);
+    setForgotStep("confirm");
+    setLoading(false);
+  }
+
+  async function onForgotConfirm(event: FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    setNotice("");
+
+    const response = await fetch("/api/student/password/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: forgotEmail.trim(),
+        code: forgotCode.trim(),
+        password: forgotPassword,
+        confirmPassword: forgotConfirmPassword
+      })
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as { message?: string };
+    if (!response.ok) {
+      setError(payload.message || text.invalidLogin);
+      setLoading(false);
+      return;
+    }
+
+    setNotice(text.resetDone);
+    setLoginEmail(forgotEmail.trim());
+    setForgotMode(false);
+    setForgotStep("request");
+    setForgotCode("");
+    setForgotPassword("");
+    setForgotConfirmPassword("");
+    setTab("login");
+    setLoading(false);
+  }
+
+  const modalHeightClass = forgotMode
+    ? forgotStep === "request"
+      ? "h-[360px]"
+      : "h-[500px]"
+    : tab === "register"
+      ? "h-[480px]"
+      : "h-[360px]";
+
   return (
     <>
       <button
         type="button"
         onClick={() => openModal("default")}
-        className={`hidden lg:inline-flex rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-          darkText
-            ? "border border-[#FFE066] bg-gradient-to-br from-[#FFD428] to-[#FFC000] text-[#0A1022] hover:from-[#FFC000] hover:to-[#FFB000]"
-            : "bg-white/20 text-white hover:bg-white/30"
+        className={`liquid-glass-btn relative hidden lg:inline-flex items-center justify-center rounded-xl px-8 py-2 text-sm font-semibold transition ${
+          darkText ? "text-[#0A1022]" : "text-white"
         }`}
       >
-        {text.open}
+        <span className="liquid-glass-btn__backdrop" />
+        <span className="liquid-glass-btn__edge liquid-glass-btn__edge--top" />
+        <span className="liquid-glass-btn__edge liquid-glass-btn__edge--bottom" />
+        <span className="liquid-glass-btn__edge liquid-glass-btn__edge--left" />
+        <span className="liquid-glass-btn__edge liquid-glass-btn__edge--right" />
+        <span className="relative z-[2]">{text.open}</span>
       </button>
 
       {mounted ? (
@@ -297,37 +433,51 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className={`w-full max-w-md origin-top overflow-hidden rounded-[30px] border border-white/25 bg-[#1a1a1d]/60 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)] transition-[height,transform,opacity] duration-280 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              tab === "register" ? "h-[480px]" : "h-[360px]"
-            } ${
+            className={`w-full max-w-md origin-top overflow-hidden rounded-[30px] border border-white/25 bg-[#1a1a1d]/60 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)] transition-[height,transform,opacity] duration-280 ease-[cubic-bezier(0.22,1,0.36,1)] ${modalHeightClass} ${
               visible
                 ? "translate-y-0 scale-100 opacity-100"
                 : "translate-y-5 scale-95 opacity-0"
             }`}
           >
             <div className="mb-4 flex items-center justify-between">
-              <div className="inline-flex rounded-2xl bg-black/55 p-1">
+              {forgotMode ? (
                 <button
                   type="button"
-                  onClick={() => switchTab("login")}
-                  className={`min-w-24 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    tab === "login" ? "bg-white/18 text-white" : "text-white/65"
-                  }`}
+                  onClick={() => {
+                    setError("");
+                    setNotice("");
+                    resetForgotState();
+                    setFormAnimKey((prev) => prev + 1);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-black/35 px-3 py-2 text-sm font-semibold text-white/85 hover:bg-black/45"
                 >
-                  {text.signIn}
+                  <ArrowLeft size={16} />
+                  {text.backToLogin}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => switchTab("register")}
-                  className={`min-w-24 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    tab === "register"
-                      ? "bg-white/18 text-white"
-                      : "text-white/65"
-                  }`}
-                >
-                  {text.signUp}
-                </button>
-              </div>
+              ) : (
+                <div className="inline-flex rounded-2xl bg-black/55 p-1">
+                  <button
+                    type="button"
+                    onClick={() => switchTab("login")}
+                    className={`min-w-24 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                      tab === "login" ? "bg-white/18 text-white" : "text-white/65"
+                    }`}
+                  >
+                    {text.signIn}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => switchTab("register")}
+                    className={`min-w-24 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                      tab === "register"
+                        ? "bg-white/18 text-white"
+                        : "text-white/65"
+                    }`}
+                  >
+                    {text.signUp}
+                  </button>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -340,17 +490,92 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
             </div>
 
             <h3 className="mb-4 text-4xl font-black tracking-tight text-white">
-              {tab === "register" ? text.createTitle : text.welcomeTitle}
+              {forgotMode ? text.forgotTitle : tab === "register" ? text.createTitle : text.welcomeTitle}
             </h3>
+            {forgotMode ? <p className="mb-3 text-sm text-white/70">{text.forgotSubtitle}</p> : null}
 
             {error ? (
               <p className="mb-3 rounded-xl bg-red-500/20 px-3 py-2 text-sm text-red-100">
                 {error}
               </p>
             ) : null}
+            {notice ? (
+              <p className="mb-3 rounded-xl bg-green-500/20 px-3 py-2 text-sm text-green-100">
+                {notice}
+              </p>
+            ) : null}
 
             <div className="relative mt-1">
-              {tab === "login" ? (
+              {forgotMode ? (
+                <form
+                  key={`forgot-${forgotStep}-${formAnimKey}`}
+                  onSubmit={forgotStep === "request" ? onForgotRequest : onForgotConfirm}
+                  className="space-y-3 animate-[authFormIn_240ms_cubic-bezier(0.22,1,0.36,1)]"
+                >
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(event) => setForgotEmail(event.target.value)}
+                    placeholder={text.emailPlaceholder}
+                    className="w-full rounded-xl border border-white/20 bg-black/38 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none"
+                    required
+                    disabled={forgotStep === "confirm"}
+                  />
+
+                  {forgotStep === "confirm" ? (
+                    <>
+                      <input
+                        value={forgotCode}
+                        onChange={(event) => setForgotCode(event.target.value)}
+                        placeholder={text.codeLabel}
+                        className="w-full rounded-xl border border-white/20 bg-black/38 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none"
+                        required
+                        maxLength={6}
+                      />
+                      <div className="relative">
+                        {showForgotPasswordHint ? (
+                          <div className="pointer-events-none absolute -top-1 left-0 z-20 -translate-y-full rounded-lg border border-red-300/60 bg-[#2f1111]/95 px-3 py-2 text-[11px] text-red-100 shadow-xl">
+                            <ul className="space-y-0.5">
+                              {forgotPasswordMissing.map((rule) => (
+                                <li key={rule}>• {rule}</li>
+                              ))}
+                            </ul>
+                            <span className="absolute left-4 top-full h-2 w-2 rotate-45 border-r border-b border-red-300/60 bg-[#2f1111]/95" />
+                          </div>
+                        ) : null}
+                        <input
+                          type="password"
+                          value={forgotPassword}
+                          onChange={(event) => setForgotPassword(event.target.value)}
+                          placeholder={text.newPassword}
+                          className={`w-full rounded-xl border bg-black/38 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none ${
+                            showForgotPasswordHint ? "border-red-300/70" : "border-white/20"
+                          }`}
+                          required
+                        />
+                      </div>
+                      <input
+                        type="password"
+                        value={forgotConfirmPassword}
+                        onChange={(event) => setForgotConfirmPassword(event.target.value)}
+                        placeholder={text.confirmPassword}
+                        className="w-full rounded-xl border border-white/20 bg-black/38 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none"
+                        required
+                      />
+                    </>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    className="auth-submit-btn mt-1 w-full rounded-xl bg-white px-4 py-3 text-base font-bold text-[#1A2D47] shadow-lg"
+                    disabled={loading}
+                  >
+                    {forgotStep === "request"
+                      ? loading ? text.sendingCode : text.sendCode
+                      : loading ? text.updatingPassword : text.updatePassword}
+                  </button>
+                </form>
+              ) : tab === "login" ? (
                 <form
                   key={`login-${formAnimKey}`}
                   onSubmit={onLogin}
@@ -374,17 +599,25 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
                 />
                 <button
                   type="submit"
-                  className="mt-1 w-full rounded-xl bg-white px-4 py-3 text-base font-bold text-[#1A2D47] shadow-lg"
+                  className="auth-submit-btn mt-1 w-full rounded-xl bg-white px-4 py-3 text-base font-bold text-[#1A2D47] shadow-lg"
                   disabled={loading}
                 >
                   {loading ? text.signingInBtn : text.signInBtn}
                 </button>
-                <a
-                  href="/student/forgot-password"
-                  className="block text-center text-sm !text-white underline"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(loginEmail);
+                    setError("");
+                    setNotice("");
+                    setForgotMode(true);
+                    setForgotStep("request");
+                    setFormAnimKey((prev) => prev + 1);
+                  }}
+                  className="block w-full text-center text-sm !text-white underline"
                 >
                   {text.forgot}
-                </a>
+                </button>
               </form>
               ) : (
                 <form
@@ -460,7 +693,7 @@ export function StudentAuthModal({ darkText = false, lang = "ru" }: Props) {
 
                 <button
                   type="submit"
-                  className="mt-1 w-full rounded-xl bg-white px-4 py-3 text-base font-bold text-[#1A2D47] shadow-lg"
+                  className="auth-submit-btn mt-1 w-full rounded-xl bg-white px-4 py-3 text-base font-bold text-[#1A2D47] shadow-lg"
                   disabled={loading}
                 >
                   {loading ? text.creatingBtn : text.createBtn}

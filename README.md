@@ -68,7 +68,6 @@ Open:
 - Auth modal: `http://localhost:3000/?auth=1`
 - Admin: `http://localhost:3000/admin`
 - Student dashboard: `http://localhost:3000/student`
-- Student forgot password: `http://localhost:3000/student/forgot-password`
 
 ## Poster Upload Flow
 

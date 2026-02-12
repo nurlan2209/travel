@@ -142,7 +142,7 @@ export default function Tours({ lang }: ToursProps) {
                 key={tour.id}
                 className="glass-card group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="relative h-56 overflow-hidden">
+                <div className="relative h-57 overflow-hidden">
                   <ImageWithFallback
                     src={posterImage || tour.image}
                     alt={tour.title}
@@ -171,31 +171,29 @@ export default function Tours({ lang }: ToursProps) {
 
                   <div className="mb-4 space-y-2">
                     <div className="flex items-center text-sm text-[#0A1022]/70">
-                      <Clock size={16} className="mr-2 text-[#0D3B8E]" />
+                      <Clock size={16} className="tour-metric-icon mr-2 text-[#0D3B8E]" />
                       <span>{tour.duration}</span>
                     </div>
                     <div className="flex items-center text-sm text-[#0A1022]/70">
-                      <Calendar size={16} className="mr-2 text-[#0D3B8E]" />
+                      <Calendar size={16} className="tour-metric-icon mr-2 text-[#0D3B8E]" />
                       <span>{tour.date}</span>
                     </div>
                     <div className="flex items-center text-sm text-[#0A1022]/70">
-                      <MapPin size={16} className="mr-2 text-[#0D3B8E]" />
+                      <MapPin size={16} className="tour-metric-icon mr-2 text-[#0D3B8E]" />
                       <span>{tour.location}</span>
                     </div>
                     <div className="flex items-center text-sm text-[#0A1022]/70">
-                      <Users size={16} className="mr-2 text-[#0D3B8E]" />
+                      <Users size={16} className="tour-metric-icon mr-2 text-[#0D3B8E]" />
                       <span>
                         {t.participants}: {tour.participants}
                       </span>
                     </div>
                   </div>
 
-                  <p className="mb-4 line-clamp-2 text-sm text-[#0A1022]/60">{tour.description}</p>
-
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs text-[#0A1022]/60">{t.from}</span>
-                      <p className="text-xl font-bold text-[#C81F1F]">{tour.price}</p>
+                      <p className="tour-price-text text-xl font-bold text-[#C81F1F]">{tour.price}</p>
                     </div>
                     <Link
                       href={`/tours/${tour.slug}?lang=${lang}`}

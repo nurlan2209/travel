@@ -6,19 +6,76 @@ import { studentProfileUpdateSchema } from "@/lib/validation";
 export async function GET() {
   try {
     const session = await requireStudent();
-    const profile = await prisma.studentProfile.findUnique({
-      where: { userId: session.user.id },
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
       select: {
-        fullName: true,
-        phone: true,
-        university: true,
-        avatarUrl: true,
-        bio: true,
-        user: { select: { email: true } }
+        email: true,
+        studentProfile: {
+          select: {
+            fullName: true,
+            phone: true,
+            university: true,
+            avatarUrl: true,
+            bio: true
+          }
+        }
       }
     });
 
-    return NextResponse.json(profile);
+    if (!user) {
+      return NextResponse.json({ message: "Пользователь не найден" }, { status: 404 });
+    }
+
+    if (user.studentProfile) {
+      return NextResponse.json({
+        ...user.studentProfile,
+        user: { email: user.email }
+      });
+    }
+
+    // Fallback for old student accounts created before profile data migration:
+    // use latest application snapshot to restore profile fields.
+    const latestApplication = await prisma.studentTourApplication.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        fullName: true,
+        phone: true,
+        university: true
+      }
+    });
+
+    if (latestApplication) {
+      const restoredProfile = await prisma.studentProfile.create({
+        data: {
+          userId: session.user.id,
+          fullName: latestApplication.fullName,
+          phone: latestApplication.phone,
+          university: latestApplication.university
+        },
+        select: {
+          fullName: true,
+          phone: true,
+          university: true,
+          avatarUrl: true,
+          bio: true
+        }
+      });
+
+      return NextResponse.json({
+        ...restoredProfile,
+        user: { email: user.email }
+      });
+    }
+
+    return NextResponse.json({
+      fullName: "",
+      phone: "",
+      university: "",
+      avatarUrl: null,
+      bio: null,
+      user: { email: user.email }
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "UNAUTHORIZED";
     const status = message === "FORBIDDEN" ? 403 : 401;

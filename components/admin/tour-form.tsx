@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,6 +25,11 @@ type PosterTemplateData = {
     timeline: Array<{ time: string; text: string }>;
     priceLabel: string;
     registerNote: string;
+  };
+  tourDetails: {
+    included: string[];
+    excluded: string[];
+    plan: Array<{ title: string; description: string }>;
   };
   posterUrls?: string[];
 };
@@ -72,6 +78,11 @@ const EMPTY_POSTER: PosterTemplateData = {
     priceLabel: "-",
     registerNote: "-"
   },
+  tourDetails: {
+    included: [],
+    excluded: [],
+    plan: []
+  },
   posterUrls: []
 };
 
@@ -90,6 +101,20 @@ function normalizePosterTemplateData(input: unknown): PosterTemplateData {
   const item = typeof input === "object" && input && !Array.isArray(input) ? (input as Record<string, unknown>) : {};
   const posterA = typeof item.posterA === "object" && item.posterA && !Array.isArray(item.posterA) ? (item.posterA as Record<string, unknown>) : {};
   const posterB = typeof item.posterB === "object" && item.posterB && !Array.isArray(item.posterB) ? (item.posterB as Record<string, unknown>) : {};
+  const tourDetails = typeof item.tourDetails === "object" && item.tourDetails && !Array.isArray(item.tourDetails)
+    ? (item.tourDetails as Record<string, unknown>)
+    : {};
+  const included = Array.isArray(tourDetails.included) ? tourDetails.included.filter((v): v is string => typeof v === "string" && v.trim().length > 0) : [];
+  const excluded = Array.isArray(tourDetails.excluded) ? tourDetails.excluded.filter((v): v is string => typeof v === "string" && v.trim().length > 0) : [];
+  const plan = Array.isArray(tourDetails.plan)
+    ? tourDetails.plan
+        .filter((v): v is { title?: string; description?: string } => typeof v === "object" && v !== null)
+        .map((item) => ({
+          title: item.title?.trim() || "",
+          description: item.description?.trim() || ""
+        }))
+        .filter((item) => item.title.length > 0 && item.description.length > 0)
+    : [];
   const rawUrls = Array.isArray(item.posterUrls) ? item.posterUrls : [];
   const posterUrls = rawUrls.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
 
@@ -117,8 +142,43 @@ function normalizePosterTemplateData(input: unknown): PosterTemplateData {
       priceLabel: typeof posterB.priceLabel === "string" && posterB.priceLabel ? posterB.priceLabel : "-",
       registerNote: typeof posterB.registerNote === "string" && posterB.registerNote ? posterB.registerNote : "-"
     },
+    tourDetails: {
+      included,
+      excluded,
+      plan
+    },
     posterUrls
   };
+}
+
+function toMultiline(items: string[]) {
+  return items.join("\n");
+}
+
+function parseMultiline(value: string) {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function planToMultiline(items: Array<{ title: string; description: string }>) {
+  return items.map((item) => `${item.title} | ${item.description}`).join("\n");
+}
+
+function parsePlanMultiline(value: string) {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [title, ...rest] = line.split("|");
+      return {
+        title: (title ?? "").trim(),
+        description: rest.join("|").trim()
+      };
+    })
+    .filter((item) => item.title.length > 0 && item.description.length > 0);
 }
 
 async function uploadFileToCloudinary(file: File): Promise<string> {
@@ -178,6 +238,11 @@ const tourFormUi = {
     locationPlaceholder: "Мысалы: Түркістан облысы",
     title: "Тақырып",
     description: "Сипаттама",
+    included: "Не кіреді",
+    excluded: "Не кірмейді",
+    planRows: "Тур жоспары (жолдар)",
+    detailsHintList: "Әр тармақты жаңа жолдан жазыңыз",
+    detailsHintPlan: "Формат: Тақырып | Сипаттама",
     postersWarning: "Жариялау үшін барлық 3 тілге кемі 1 постер жүктеген дұрыс.",
     publishWithoutPosters: "Кей тілдерде постерлер жоқ. Ескертуімен жариялау керек пе?",
     posterUploadFailed: "Постер жүктеу сәтсіз аяқталды.",
@@ -225,6 +290,11 @@ const tourFormUi = {
     locationPlaceholder: "Например: Туркестанская область",
     title: "Название",
     description: "Описание",
+    included: "Что входит",
+    excluded: "Что не входит",
+    planRows: "План тура (строки)",
+    detailsHintList: "Каждый пункт с новой строки",
+    detailsHintPlan: "Формат: Заголовок | Описание",
     postersWarning: "Для публикации лучше загрузить хотя бы 1 постер для всех 3 языков.",
     publishWithoutPosters: "В некоторых языках нет постеров. Публиковать с предупреждением?",
     posterUploadFailed: "Не удалось загрузить постер.",
@@ -272,6 +342,11 @@ const tourFormUi = {
     locationPlaceholder: "e.g. Turkistan Region",
     title: "Title",
     description: "Description",
+    included: "Included",
+    excluded: "Excluded",
+    planRows: "Tour plan rows",
+    detailsHintList: "One item per line",
+    detailsHintPlan: "Format: Title | Description",
     postersWarning: "For publishing, upload at least one poster for all 3 languages.",
     publishWithoutPosters: "Some languages have no posters. Publish anyway?",
     posterUploadFailed: "Poster upload failed.",
@@ -337,6 +412,23 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
     ru: mappedInitial.translations.ru.posterTemplateData.posterUrls ?? [],
     kz: mappedInitial.translations.kz.posterTemplateData.posterUrls ?? [],
     en: mappedInitial.translations.en.posterTemplateData.posterUrls ?? []
+  });
+  const [detailsDraftByLang, setDetailsDraftByLang] = useState<Record<"ru" | "kz" | "en", { included: string; excluded: string; plan: string }>>({
+    ru: {
+      included: toMultiline(mappedInitial.translations.ru.posterTemplateData.tourDetails.included),
+      excluded: toMultiline(mappedInitial.translations.ru.posterTemplateData.tourDetails.excluded),
+      plan: planToMultiline(mappedInitial.translations.ru.posterTemplateData.tourDetails.plan)
+    },
+    kz: {
+      included: toMultiline(mappedInitial.translations.kz.posterTemplateData.tourDetails.included),
+      excluded: toMultiline(mappedInitial.translations.kz.posterTemplateData.tourDetails.excluded),
+      plan: planToMultiline(mappedInitial.translations.kz.posterTemplateData.tourDetails.plan)
+    },
+    en: {
+      included: toMultiline(mappedInitial.translations.en.posterTemplateData.tourDetails.included),
+      excluded: toMultiline(mappedInitial.translations.en.posterTemplateData.tourDetails.excluded),
+      plan: planToMultiline(mappedInitial.translations.en.posterTemplateData.tourDetails.plan)
+    }
   });
 
   const form = useForm<TourFormValues>({
@@ -424,6 +516,11 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
           translationStatus: "MANUAL" as const,
           posterTemplateData: {
             ...values.translations.ru.posterTemplateData,
+            tourDetails: {
+              included: parseMultiline(detailsDraftByLang.ru.included),
+              excluded: parseMultiline(detailsDraftByLang.ru.excluded),
+              plan: parsePlanMultiline(detailsDraftByLang.ru.plan)
+            },
             posterUrls: posterUrlsByLang.ru.filter(Boolean)
           }
         },
@@ -433,6 +530,11 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
             values.translations.kz.translationStatus === "AUTO_GENERATED" ? "AUTO_EDITED" : values.translations.kz.translationStatus,
           posterTemplateData: {
             ...values.translations.kz.posterTemplateData,
+            tourDetails: {
+              included: parseMultiline(detailsDraftByLang.kz.included),
+              excluded: parseMultiline(detailsDraftByLang.kz.excluded),
+              plan: parsePlanMultiline(detailsDraftByLang.kz.plan)
+            },
             posterUrls: posterUrlsByLang.kz.filter(Boolean)
           }
         },
@@ -442,6 +544,11 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
             values.translations.en.translationStatus === "AUTO_GENERATED" ? "AUTO_EDITED" : values.translations.en.translationStatus,
           posterTemplateData: {
             ...values.translations.en.posterTemplateData,
+            tourDetails: {
+              included: parseMultiline(detailsDraftByLang.en.included),
+              excluded: parseMultiline(detailsDraftByLang.en.excluded),
+              plan: parsePlanMultiline(detailsDraftByLang.en.plan)
+            },
             posterUrls: posterUrlsByLang.en.filter(Boolean)
           }
         }
@@ -671,16 +778,106 @@ export function TourForm({ initial, lang = "ru" }: { initial?: TourResponse; lan
             <h4 className="mb-2 text-sm font-bold uppercase text-white">RU</h4>
             <Input label={ui.title} {...form.register("translations.ru.title")} />
             <Input label={ui.description} {...form.register("translations.ru.description")} />
+            <Textarea
+              label={ui.included}
+              value={detailsDraftByLang.ru.included}
+              hint={ui.detailsHintList}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  ru: { ...prev.ru, included: event.target.value }
+                }))}
+            />
+            <Textarea
+              label={ui.excluded}
+              value={detailsDraftByLang.ru.excluded}
+              hint={ui.detailsHintList}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  ru: { ...prev.ru, excluded: event.target.value }
+                }))}
+            />
+            <Textarea
+              label={ui.planRows}
+              value={detailsDraftByLang.ru.plan}
+              hint={ui.detailsHintPlan}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  ru: { ...prev.ru, plan: event.target.value }
+                }))}
+            />
           </div>
           <div className="rounded-xl border border-white/20 bg-black/20 p-3">
             <h4 className="mb-2 text-sm font-bold uppercase text-white">KZ</h4>
             <Input label={ui.title} {...form.register("translations.kz.title")} />
             <Input label={ui.description} {...form.register("translations.kz.description")} />
+            <Textarea
+              label={ui.included}
+              value={detailsDraftByLang.kz.included}
+              hint={ui.detailsHintList}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  kz: { ...prev.kz, included: event.target.value }
+                }))}
+            />
+            <Textarea
+              label={ui.excluded}
+              value={detailsDraftByLang.kz.excluded}
+              hint={ui.detailsHintList}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  kz: { ...prev.kz, excluded: event.target.value }
+                }))}
+            />
+            <Textarea
+              label={ui.planRows}
+              value={detailsDraftByLang.kz.plan}
+              hint={ui.detailsHintPlan}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  kz: { ...prev.kz, plan: event.target.value }
+                }))}
+            />
           </div>
           <div className="rounded-xl border border-white/20 bg-black/20 p-3">
             <h4 className="mb-2 text-sm font-bold uppercase text-white">EN</h4>
             <Input label={ui.title} {...form.register("translations.en.title")} />
             <Input label={ui.description} {...form.register("translations.en.description")} />
+            <Textarea
+              label={ui.included}
+              value={detailsDraftByLang.en.included}
+              hint={ui.detailsHintList}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  en: { ...prev.en, included: event.target.value }
+                }))}
+            />
+            <Textarea
+              label={ui.excluded}
+              value={detailsDraftByLang.en.excluded}
+              hint={ui.detailsHintList}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  en: { ...prev.en, excluded: event.target.value }
+                }))}
+            />
+            <Textarea
+              label={ui.planRows}
+              value={detailsDraftByLang.en.plan}
+              hint={ui.detailsHintPlan}
+              onChange={(event) =>
+                setDetailsDraftByLang((prev) => ({
+                  ...prev,
+                  en: { ...prev.en, plan: event.target.value }
+                }))}
+            />
           </div>
         </div>
       </section>
@@ -751,6 +948,28 @@ function Select({ label, options, ...props }: SelectProps) {
           </option>
         ))}
       </select>
+    </label>
+  );
+}
+
+type TextareaProps = {
+  label: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  hint?: string;
+};
+
+function Textarea({ label, value, onChange, hint }: TextareaProps) {
+  return (
+    <label className="mt-2 block">
+      <span className="mb-1 block text-xs text-white/80">{label}</span>
+      <textarea
+        value={value}
+        onChange={onChange}
+        rows={4}
+        className="w-full resize-y rounded-xl border border-white/30 bg-black/20 px-3 py-2 text-sm text-white outline-none"
+      />
+      {hint ? <span className="mt-1 block text-[11px] text-white/55">{hint}</span> : null}
     </label>
   );
 }

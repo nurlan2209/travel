@@ -41,6 +41,11 @@ export const posterTimelineItemSchema = z.object({
   text: z.string().min(1)
 });
 
+export const tourPlanItemSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1)
+});
+
 export const posterTemplateSchema = z.object({
   posterA: z.object({
     heroTagline: z.string().min(1).default("-"),
@@ -56,11 +61,20 @@ export const posterTemplateSchema = z.object({
     timeline: z.array(posterTimelineItemSchema).min(1).max(16).default([{ time: "-", text: "-" }]),
     priceLabel: z.string().min(1).default("-"),
     registerNote: z.string().min(1).default("-")
+    }).default({
+      programTitle: "-",
+      timeline: [{ time: "-", text: "-" }],
+      priceLabel: "-",
+      registerNote: "-"
+    }),
+  tourDetails: z.object({
+    included: z.array(z.string().min(1)).default([]),
+    excluded: z.array(z.string().min(1)).default([]),
+    plan: z.array(tourPlanItemSchema).default([])
   }).default({
-    programTitle: "-",
-    timeline: [{ time: "-", text: "-" }],
-    priceLabel: "-",
-    registerNote: "-"
+    included: [],
+    excluded: [],
+    plan: []
   }),
   posterUrls: z.array(z.string().url()).default([])
 });

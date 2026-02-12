@@ -130,7 +130,7 @@ export default function Gallery({ lang }: GalleryProps) {
         </div>
 
         {galleryImages.length === 0 ? (
-          <div className="mx-auto max-w-3xl rounded-3xl border border-[#0A1022]/10 bg-white/80 p-6 text-center text-[#0A1022]/70 shadow-[0_18px_46px_rgba(10,16,34,0.08)]">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-[#0A1022]/10 bg-[#0D3B8E20] p-6 text-center text-[#0A1022]/70 shadow-[0_18px_46px_rgba(10,16,34,0.08)]">
             {t.empty}
           </div>
         ) : (

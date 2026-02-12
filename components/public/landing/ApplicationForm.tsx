@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { FormEvent } from "react";
 import { useSession } from "next-auth/react";
@@ -119,6 +119,11 @@ export default function ApplicationForm({ lang }: ApplicationFormProps) {
   const [notice, setNotice] = useState<Notice | null>(null);
   const pendingAuthSubmitRef = useRef(false);
   const studentProfile = session?.user?.role === "STUDENT" ? profile : null;
+  const isStudentProfileComplete = Boolean(
+    studentProfile?.fullName?.trim() &&
+    studentProfile?.phone?.trim() &&
+    studentProfile?.university?.trim()
+  );
 
   useEffect(() => {
     async function loadTours() {
@@ -136,26 +141,29 @@ export default function ApplicationForm({ lang }: ApplicationFormProps) {
     void loadTours();
   }, [lang]);
 
-  useEffect(() => {
+  const loadProfile = useCallback(async () => {
     if (session?.user?.role !== "STUDENT") {
+      setProfile(null);
       return;
     }
-
-    async function loadProfile() {
-      setLoadingProfile(true);
-      const response = await fetch("/api/student/profile", { cache: "no-store" });
-      const payload = (await response.json().catch(() => null)) as StudentProfilePayload;
-      if (!response.ok) {
-        setProfile(null);
-        setLoadingProfile(false);
-        return;
-      }
-      setProfile(payload);
+    setLoadingProfile(true);
+    const response = await fetch("/api/student/profile", { cache: "no-store" });
+    const payload = (await response.json().catch(() => null)) as StudentProfilePayload;
+    if (!response.ok) {
+      setProfile(null);
       setLoadingProfile(false);
+      return;
     }
+    setProfile(payload);
+    setLoadingProfile(false);
+  }, [session?.user?.role]);
 
-    void loadProfile();
-  }, [session?.user?.id, session?.user?.role]);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadProfile();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadProfile, session?.user?.id]);
 
   useEffect(() => {
     if (!notice) return;
@@ -168,6 +176,7 @@ export default function ApplicationForm({ lang }: ApplicationFormProps) {
       const custom = event as CustomEvent<{ role?: string }>;
       if (custom.detail?.role === "STUDENT") {
         setNotice({ type: "info", text: ui.authSuccess });
+        void loadProfile();
       } else if (pendingAuthSubmitRef.current) {
         setNotice({ type: "error", text: ui.onlyStudent });
       }
@@ -176,7 +185,7 @@ export default function ApplicationForm({ lang }: ApplicationFormProps) {
 
     window.addEventListener("mnu:auth-success", onAuthSuccess as EventListener);
     return () => window.removeEventListener("mnu:auth-success", onAuthSuccess as EventListener);
-  }, [ui.authSuccess, ui.onlyStudent]);
+  }, [loadProfile, ui.authSuccess, ui.onlyStudent]);
 
   function openAuthModalForApplication() {
     pendingAuthSubmitRef.current = true;
@@ -238,7 +247,7 @@ export default function ApplicationForm({ lang }: ApplicationFormProps) {
       return;
     }
 
-    if (!profile) {
+    if (!isStudentProfileComplete) {
       setNotice({ type: "error", text: ui.profileMissing });
       return;
     }
