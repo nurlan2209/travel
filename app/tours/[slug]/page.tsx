@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { SiteHeader } from "@/components/public/site-header";
 import { authOptions } from "@/lib/auth";
 import { TourLightboxGrid } from "@/components/public/tour-lightbox-grid";
+import { OpenTourApplicationButton, TourApplicationModal } from "@/components/public/tour-application-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,6 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
       tourPlan: "Тур жоспары",
       similar: "Ұқсас турлар",
       quickApply: "Онлайн өтінім",
-      quickApplyHint: "Өтінімді басты беттегі форма арқылы жіберіңіз.",
       from: "Бағасы",
       emptyDetails: "Бұл бөлім әлі толтырылмаған."
     },
@@ -71,7 +71,6 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
       tourPlan: "План тура",
       similar: "Похожие туры",
       quickApply: "Быстрая заявка",
-      quickApplyHint: "Отправьте заявку через форму на главной странице.",
       from: "Цена",
       emptyDetails: "Этот раздел пока не заполнен."
     },
@@ -92,7 +91,6 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
       tourPlan: "Tour Plan",
       similar: "Similar tours",
       quickApply: "Quick application",
-      quickApplyHint: "Submit your application via the home page form.",
       from: "Price",
       emptyDetails: "This section is not filled yet."
     }
@@ -170,9 +168,9 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
 
   return (
     <main className="theme-page-surface theme-tour-page min-h-screen bg-[#FFF9DF] text-[#0A1022]">
-      <SiteHeader lang={lang} />
+      <SiteHeader lang={lang} solidOnScrollTargetId="tour-hero" />
 
-      <section className="relative overflow-hidden border-b border-[#0A1022]/10 pt-20">
+      <section id="tour-hero" className="relative overflow-hidden border-b border-[#0A1022]/10">
         <div className="relative h-[52vh] min-h-[360px] w-full">
           <Image
             src={tour.coverImage}
@@ -200,12 +198,10 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
               <p className="mt-3 text-sm leading-relaxed text-white/88 md:text-base">{translation.description}</p>
             ) : null}
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <Link
-                href={`/?lang=${lang}#application`}
+              <OpenTourApplicationButton
+                label={ui.apply}
                 className="rounded-xl border border-[#FFE066] bg-gradient-to-br from-[#FFD428] to-[#FFC000] px-5 py-2.5 text-sm font-bold text-[#0A1022] transition hover:from-[#FFC000] hover:to-[#FFB000]"
-              >
-                {ui.apply}
-              </Link>
+              />
               <Link href={`/tours?lang=${lang}`} className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/15">
                 {ui.allTours}
               </Link>
@@ -364,16 +360,18 @@ export default async function TourPage({ params, searchParams }: TourPageProps) 
             <p className="text-sm text-[#0A1022]/70">{ui.from}</p>
             <p className="mt-1 text-3xl font-black text-[#C81F1F]">{formatPrice(tour.price, lang)}</p>
             <p className="mt-3 text-sm text-[#0A1022]/70">{ui.quickApply}</p>
-            <p className="mt-1 text-xs text-[#0A1022]/60">{ui.quickApplyHint}</p>
-            <Link
-              href={`/?lang=${lang}#application`}
+            <OpenTourApplicationButton
+              label={ui.apply}
               className="mt-5 flex w-full items-center justify-center rounded-xl border border-[#FFE066] bg-gradient-to-br from-[#FFD428] to-[#FFC000] px-4 py-3 text-sm font-bold text-[#0A1022] transition hover:from-[#FFC000] hover:to-[#FFB000]"
-            >
-              {ui.apply}
-            </Link>
+            />
           </div>
         </aside>
       </section>
+      <TourApplicationModal
+        lang={lang}
+        tourPostId={tour.id}
+        tourTitle={translation?.title ?? tour.place}
+      />
     </main>
   );
 }

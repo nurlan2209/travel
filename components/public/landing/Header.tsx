@@ -190,7 +190,7 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
 
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex h-20 items-center">
-          <div className="flex items-center lg:w-[240px]">
+          <div className="header-desktop-left flex items-center">
             <button onClick={() => handleNavClick("home")} className="group flex cursor-pointer items-center space-x-3 lg:ml-4">
               <div className="relative h-17 w-20">
                 <Image
@@ -203,8 +203,8 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
             </button>
           </div>
 
-          <div className="hidden flex-1 justify-center lg:flex">
-            <nav className={`liquid-nav-group ${isPastTours ? "liquid-nav-group--dark" : "liquid-nav-group--light"}`}>
+          <div className="header-desktop-nav hidden flex-1 justify-center lg:flex">
+            <nav className={`liquid-nav-group header-nav ${isPastTours ? "liquid-nav-group--dark" : "liquid-nav-group--light"}`}>
               <span className="liquid-nav-group__backdrop" />
               <span className="liquid-nav-group__edge liquid-nav-group__edge--top" />
               <span className="liquid-nav-group__edge liquid-nav-group__edge--bottom" />
@@ -224,19 +224,21 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
             </nav>
           </div>
 
-          <div className="ml-auto flex items-center space-x-3 lg:w-[240px] lg:justify-end">
+          <div className="header-desktop-right ml-auto flex items-center gap-3 lg:justify-end">
             {isStudent ? (
               <div className="relative hidden lg:block" ref={profileMenuRef}>
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
-                  className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-all ${
+                  className={`header-profile-btn inline-flex h-10 w-10 items-center justify-center rounded-xl border p-0 transition-all ${
                     isPastTours
                       ? "border-[#0A1022]/15 bg-white/70 text-[#0A1022] hover:bg-white"
                       : "border-white/30 bg-white/20 text-white hover:bg-white/30"
                   }`}
+                  aria-label={translations[currentLang].profile}
+                  title={studentDisplayName}
                 >
-                  {studentDisplayName}
+                  <UserRound size={18} />
                 </button>
                 {profileMenuOpen ? (
                   <div className="absolute right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-white/25 bg-[#1a1a1d]/60 text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
@@ -278,7 +280,7 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
             ) : isAdminSide ? (
               <Link
                 href={quickHref}
-                className={`hidden rounded-xl border px-4 py-2 text-sm font-semibold transition-all lg:inline-flex ${
+                className={`header-profile-btn hidden rounded-xl border px-4 py-2 text-sm font-semibold transition-all lg:inline-flex ${
                   isPastTours
                     ? "border-[#0A1022]/15 bg-white/70 text-[#0A1022] hover:bg-white"
                     : "border-white/30 bg-white/20 text-white hover:bg-white/30"
@@ -290,11 +292,11 @@ export default function Header({ currentLang, onLangChange }: HeaderProps) {
               <StudentAuthModal darkText={isPastTours} lang={currentLang} />
             )}
 
-            <div className="hidden lg:flex">
+            <div className="header-theme-toggle hidden lg:flex">
               <ThemeToggle darkText={isPastTours} />
             </div>
 
-            <div className="mr-2 hidden lg:flex">
+            <div className="header-lang-switcher mr-2 hidden lg:flex">
               <div className={`lang-switcher ${isPastTours ? "lang-switcher--dark" : "lang-switcher--light"}`} style={{ "--active-index": String(activeIndex) } as CSSProperties} role="tablist" aria-label="Choose language">
                 <span ref={thumbRef} className="lang-switcher__thumb" aria-hidden="true" />
                 {langOrder.map((lang) => (

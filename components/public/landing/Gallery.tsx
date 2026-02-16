@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface GalleryProps {
@@ -23,6 +24,7 @@ export default function Gallery({ lang }: GalleryProps) {
   const dragXRef = useRef(0);
   const draggingRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [mobileIndex, setMobileIndex] = useState(0);
 
   useEffect(() => {
     async function loadMoments() {
@@ -67,6 +69,7 @@ export default function Gallery({ lang }: GalleryProps) {
   );
   const desktopImages = galleryImages.slice(0, 10);
   const angleStep = desktopImages.length > 0 ? 360 / desktopImages.length : 36;
+  const safeMobileIndex = galleryImages.length === 0 ? 0 : Math.min(mobileIndex, galleryImages.length - 1);
 
   const applyRotation = useCallback(() => {
     if (!ringRef.current) return;
@@ -121,6 +124,16 @@ export default function Gallery({ lang }: GalleryProps) {
     applyRotation();
   };
 
+  const mobilePrev = () => {
+    if (galleryImages.length < 2) return;
+    setMobileIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
+
+  const mobileNext = () => {
+    if (galleryImages.length < 2) return;
+    setMobileIndex((prev) => (prev + 1) % galleryImages.length);
+  };
+
   return (
     <section id="gallery" className="py-20 bg-gradient-to-b from-[#FFF9DF] to-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -135,14 +148,57 @@ export default function Gallery({ lang }: GalleryProps) {
           </div>
         ) : (
           <>
-            <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:hidden">
-              {galleryImages.map((image, index) => (
-                <article key={`mobile-moment-${index}`} className="glass-card relative min-h-[300px] min-w-[86%] snap-center overflow-hidden rounded-2xl">
-                  <ImageWithFallback src={image.src} alt={image.alt} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/45 px-3 py-2 text-xs text-white">{image.caption}</div>
-                </article>
-              ))}
+            <div className="md:hidden">
+              <div className="relative overflow-hidden">
+                <div
+                  className="flex transition-transform duration-500 ease-out"
+                  style={{ transform: `translateX(-${safeMobileIndex * 100}%)` }}
+                >
+                  {galleryImages.map((image, index) => (
+                    <div key={`mobile-moment-${index}`} className="w-full shrink-0 px-1">
+                      <article className="glass-card relative min-h-[300px] overflow-hidden rounded-2xl">
+                        <ImageWithFallback src={image.src} alt={image.alt} className="h-full w-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/45 px-3 py-2 text-xs text-white">{image.caption}</div>
+                      </article>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {galleryImages.length > 1 ? (
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={mobilePrev}
+                    className="grid h-9 w-9 place-items-center rounded-full border border-[#0A1022]/20 bg-white/80 text-[#0A1022] transition hover:bg-white"
+                    aria-label="Previous journey photo"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {galleryImages.map((image, index) => (
+                      <button
+                        key={`${image.src}-dot-${index}`}
+                        type="button"
+                        onClick={() => setMobileIndex(index)}
+                        className={`h-2.5 rounded-full transition-all ${
+                          safeMobileIndex === index ? "w-6 bg-[#0D3B8E]" : "w-2.5 bg-[#0A1022]/25"
+                        }`}
+                        aria-label={`Go to journey slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={mobileNext}
+                    className="grid h-9 w-9 place-items-center rounded-full border border-[#0A1022]/20 bg-white/80 text-[#0A1022] transition hover:bg-white"
+                    aria-label="Next journey photo"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <div className="relative mx-auto hidden w-full max-w-6xl md:block">

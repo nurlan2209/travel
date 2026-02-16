@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface TeamProps {
@@ -63,6 +64,7 @@ function pickRole(member: TeamMember, lang: TeamProps["lang"]) {
 
 export default function Team({ lang }: TeamProps) {
   const [members, setMembers] = useState<TeamMember[]>([]);
+  const [mobileIndex, setMobileIndex] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -91,6 +93,18 @@ export default function Team({ lang }: TeamProps) {
 
   const t = translations[lang];
   const teamMembers = members.length > 0 ? members : fallbackMembers;
+  const teamCount = teamMembers.length;
+  const safeMobileIndex = teamCount === 0 ? 0 : Math.min(mobileIndex, teamCount - 1);
+
+  const goPrev = () => {
+    if (teamCount < 2) return;
+    setMobileIndex((prev) => (prev - 1 + teamCount) % teamCount);
+  };
+
+  const goNext = () => {
+    if (teamCount < 2) return;
+    setMobileIndex((prev) => (prev + 1) % teamCount);
+  };
 
   return (
     <section id="team" className="py-20 bg-white">
@@ -100,27 +114,70 @@ export default function Team({ lang }: TeamProps) {
           <p className="text-lg text-[#0A1022]/70">{t.subtitle}</p>
         </div>
 
-        <div className="no-scrollbar md:hidden -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
-          {teamMembers.map((member) => (
-            <article key={`${member.id}-mobile`} className="team-card min-w-[84%] snap-center">
-              <div className="team-card__media">
-                <div className="team-card__image-wrap">
-                  <ImageWithFallback
-                    src={member.photoUrl}
-                    alt={pickName(member, lang)}
-                    className="team-card__image"
-                  />
-                  <div className="team-card__mask" />
-                  <h3 className="team-card__title team-card__title--overlay">{pickName(member, lang)}</h3>
-                </div>
-              </div>
+        <div className="md:hidden">
+          <div className="relative overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${safeMobileIndex * 100}%)` }}
+            >
+              {teamMembers.map((member) => (
+                <div key={`${member.id}-mobile`} className="w-full shrink-0 px-1">
+                  <article className="team-card">
+                    <div className="team-card__media">
+                      <div className="team-card__image-wrap">
+                        <ImageWithFallback
+                          src={member.photoUrl}
+                          alt={pickName(member, lang)}
+                          className="team-card__image"
+                        />
+                        <div className="team-card__mask" />
+                        <h3 className="team-card__title team-card__title--overlay">{pickName(member, lang)}</h3>
+                      </div>
+                    </div>
 
-              <section className="team-card__content">
-                <h3 className="team-card__title">{pickName(member, lang)}</h3>
-                <p className="team-card__role">{pickRole(member, lang)}</p>
-              </section>
-            </article>
-          ))}
+                    <section className="team-card__content">
+                      <h3 className="team-card__title">{pickName(member, lang)}</h3>
+                      <p className="team-card__role">{pickRole(member, lang)}</p>
+                    </section>
+                  </article>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {teamCount > 1 ? (
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={goPrev}
+                className="grid h-9 w-9 place-items-center rounded-full border border-[#0A1022]/20 bg-white/80 text-[#0A1022] transition hover:bg-white"
+                aria-label="Previous team member"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <div className="flex items-center gap-2">
+                {teamMembers.map((member, index) => (
+                  <button
+                    key={`${member.id}-dot`}
+                    type="button"
+                    onClick={() => setMobileIndex(index)}
+                    className={`h-2.5 rounded-full transition-all ${
+                      safeMobileIndex === index ? "w-6 bg-[#0D3B8E]" : "w-2.5 bg-[#0A1022]/25"
+                    }`}
+                    aria-label={`Go to team slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={goNext}
+                className="grid h-9 w-9 place-items-center rounded-full border border-[#0A1022]/20 bg-white/80 text-[#0A1022] transition hover:bg-white"
+                aria-label="Next team member"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="hidden max-w-6xl mx-auto gap-8 md:grid md:grid-cols-2 lg:grid-cols-3">

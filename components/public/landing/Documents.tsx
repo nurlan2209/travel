@@ -92,7 +92,7 @@ export default function Documents({ lang }: DocumentsProps) {
                   href={doc.fileUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="block w-full rounded-xl border border-white/10 bg-gradient-to-br from-[#0A1022] to-[#0D3B8E] px-4 py-3 text-center font-semibold text-white shadow-lg transition-all hover:from-[#0D3B8E] hover:to-[#0A2C6B] hover:shadow-xl"
+                  className="block w-full rounded-xl border border-[#FFE066] bg-gradient-to-br from-[#FFD428] to-[#FFC000] px-4 py-3 text-center font-semibold text-[#0A1022] shadow-lg transition-all duration-300 hover:from-[#FFC000] hover:to-[#FFB000] hover:shadow-xl"
                 >
                   {t.download}
                 </a>
