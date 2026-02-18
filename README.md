@@ -12,6 +12,29 @@ Next.js 16 + TypeScript project with:
 - Student portal (`/student`) with profile, my tours, and “best moments”
 - Password reset via email with 6-digit code
 
+## Docker (app + PostgreSQL)
+
+1. Заполни `.env` (минимум: `NEXTAUTH_SECRET`, Cloudinary/SMTP при необходимости).
+2. Подними контейнеры:
+
+```bash
+docker compose up -d --build
+```
+
+3. Накати миграции (один раз, с хоста проекта):
+
+```bash
+npx prisma migrate deploy
+```
+
+4. Выполни seed (первый админ + демо-тур):
+
+```bash
+npm run prisma:seed
+```
+
+Открой: `http://localhost:4000`
+
 ## 1. Install
 
 ```bash

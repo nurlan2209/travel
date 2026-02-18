@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: travel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: travel
+      POSTGRES_USER: travel
+      POSTGRES_PASSWORD: travel
+    ports:
+      - "4001:5432"
+    volumes:
+      - travel_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U travel -d travel"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: travel-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://travel:travel@db:5432/travel?schema=public
+      NEXTAUTH_URL: http://localhost:4000
+    ports:
+      - "4000:3000"
+
+volumes:
+  travel_db_data:
